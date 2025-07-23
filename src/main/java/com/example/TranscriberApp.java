@@ -21,6 +21,10 @@ public class TranscriberApp extends JFrame {
     private final JProgressBar progressBar = new JProgressBar(0, 100);
     private final File modelDir = new File("model");
     private final File outputFile = new File("transcript.txt");
+    private final JButton startStopButton = new JButton("Start");
+    private volatile boolean running = false;
+    private Thread recognitionThread;
+    private boolean modelReady = false;
 
     public TranscriberApp() {
         setTitle("VOSK Transcriber");
@@ -34,6 +38,20 @@ public class TranscriberApp extends JFrame {
         top.add(progressBar, BorderLayout.SOUTH);
         add(top, BorderLayout.NORTH);
         add(scrollPane, BorderLayout.CENTER);
+
+        JPanel bottom = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        startStopButton.setEnabled(false);
+        bottom.add(startStopButton);
+        add(bottom, BorderLayout.SOUTH);
+
+        startStopButton.addActionListener(e -> {
+            if (!running) {
+                startRecognition();
+            } else {
+                stopRecognition();
+            }
+        });
+
         ensureModel();
     }
 
@@ -74,12 +92,14 @@ public class TranscriberApp extends JFrame {
                 @Override
                 protected void done() {
                     progressBar.setVisible(false);
-                    startRecognition();
+                    modelReady = true;
+                    startStopButton.setEnabled(true);
                 }
             };
             worker.execute();
         } else {
-            startRecognition();
+            modelReady = true;
+            startStopButton.setEnabled(true);
         }
     }
 
@@ -107,7 +127,10 @@ public class TranscriberApp extends JFrame {
     }
 
     private void startRecognition() {
-        new Thread(() -> {
+        if (!modelReady || running) {
+            return;
+        }
+        recognitionThread = new Thread(() -> {
             try (Model model = new Model(modelDir.getAbsolutePath());
                  FileWriter writer = new FileWriter(outputFile, true)) {
                 Recognizer recognizer = new Recognizer(model, 16000.0f);
@@ -117,7 +140,9 @@ public class TranscriberApp extends JFrame {
                 line.open(format);
                 line.start();
                 byte[] buffer = new byte[4096];
-                while (true) {
+                running = true;
+                SwingUtilities.invokeLater(() -> startStopButton.setText("Stop"));
+                while (running && !Thread.currentThread().isInterrupted()) {
                     int n = line.read(buffer, 0, buffer.length);
                     if (n < 0) break;
                     if (recognizer.acceptWaveForm(buffer, n)) {
@@ -128,10 +153,23 @@ public class TranscriberApp extends JFrame {
                         handlePartial(partial);
                     }
                 }
+                line.stop();
+                line.close();
             } catch (Exception ex) {
                 ex.printStackTrace();
+            } finally {
+                running = false;
+                SwingUtilities.invokeLater(() -> startStopButton.setText("Start"));
             }
-        }).start();
+        });
+        recognitionThread.start();
+    }
+
+    private void stopRecognition() {
+        running = false;
+        if (recognitionThread != null) {
+            recognitionThread.interrupt();
+        }
     }
 
     private void handleResult(String json, FileWriter writer) throws IOException {
