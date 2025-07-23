@@ -15,5 +15,6 @@ mvn compile exec:java
 
 On startup the program checks for a speech model inside the `model` directory.
 If the model is missing it attempts to download
-`vosk-model-small-en-us-0.15.zip` and extract it. A progress bar is shown during
-the download.
+`vosk-model-small-en-us-0.15.zip` and extract it. The archive contains a
+subdirectory with the actual model files which the application now detects
+automatically. A progress bar is shown during the download.
