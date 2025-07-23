@@ -126,12 +126,26 @@ public class TranscriberApp extends JFrame {
         }
     }
 
+    private File locateModelPath(File dir) {
+        if (new File(dir, "am").exists()) {
+            return dir;
+        }
+        File[] subDirs = dir.listFiles(File::isDirectory);
+        if (subDirs != null && subDirs.length == 1) {
+            File candidate = subDirs[0];
+            if (new File(candidate, "am").exists()) {
+                return candidate;
+            }
+        }
+        return dir;
+    }
+
     private void startRecognition() {
         if (!modelReady || running) {
             return;
         }
         recognitionThread = new Thread(() -> {
-            try (Model model = new Model(modelDir.getAbsolutePath());
+            try (Model model = new Model(locateModelPath(modelDir).getAbsolutePath());
                  FileWriter writer = new FileWriter(outputFile, true)) {
                 Recognizer recognizer = new Recognizer(model, 16000.0f);
                 AudioFormat format = new AudioFormat(16000.0f, 16, 1, true, false);
