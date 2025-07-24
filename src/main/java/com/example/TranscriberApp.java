@@ -100,7 +100,7 @@ public class TranscriberApp extends JFrame {
         }
         ModelInfo info = models.get(sel);
         currentModelDir = new File(modelsBaseDir, info.dirName);
-        if (!currentModelDir.exists()) {
+        if (!isModelValid(currentModelDir)) {
             progressBar.setVisible(true);
             modelReady = false;
             updateStartButtonState();
@@ -139,13 +139,13 @@ public class TranscriberApp extends JFrame {
                 @Override
                 protected void done() {
                     progressBar.setVisible(false);
-                    modelReady = true;
+                    modelReady = isModelValid(currentModelDir);
                     updateStartButtonState();
                 }
             };
             worker.execute();
         } else {
-            modelReady = true;
+            modelReady = isModelValid(currentModelDir);
             updateStartButtonState();
         }
     }
@@ -185,6 +185,11 @@ public class TranscriberApp extends JFrame {
             }
         }
         return dir;
+    }
+
+    private boolean isModelValid(File dir) {
+        File path = locateModelPath(dir);
+        return new File(path, "am").exists();
     }
 
     private void loadInputDevices() {
