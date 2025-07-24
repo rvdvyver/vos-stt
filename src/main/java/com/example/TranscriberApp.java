@@ -12,6 +12,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.*;
 import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -21,12 +23,25 @@ public class TranscriberApp extends JFrame {
     private final JProgressBar progressBar = new JProgressBar(0, 100);
     private final JProgressBar volumeBar = new JProgressBar(0, 100);
     private final JComboBox<Mixer.Info> deviceComboBox = new JComboBox<>();
-    private final File modelDir = new File("model");
+    private final JComboBox<String> modelComboBox = new JComboBox<>();
+    private final File modelsBaseDir = new File("models");
+    private File currentModelDir;
     private final File outputFile = new File("transcript.txt");
     private final JButton startStopButton = new JButton("Start");
     private volatile boolean running = false;
     private Thread recognitionThread;
     private boolean modelReady = false;
+
+    private static class ModelInfo {
+        final String url;
+        final String dirName;
+        ModelInfo(String url, String dirName) {
+            this.url = url;
+            this.dirName = dirName;
+        }
+    }
+
+    private final Map<String, ModelInfo> models = new LinkedHashMap<>();
 
     public TranscriberApp() {
         setTitle("VOSK Transcriber");
@@ -47,8 +62,23 @@ public class TranscriberApp extends JFrame {
         volumeBar.setPreferredSize(new Dimension(100, 16));
         bottom.add(volumeBar);
         bottom.add(deviceComboBox);
+        bottom.add(modelComboBox);
         bottom.add(startStopButton);
         add(bottom, BorderLayout.SOUTH);
+
+        models.put("English (small)", new ModelInfo(
+                "https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip",
+                "vosk-model-small-en-us-0.15"));
+        models.put("English (large)", new ModelInfo(
+                "https://alphacephei.com/vosk/models/vosk-model-en-us-0.22.zip",
+                "vosk-model-en-us-0.22"));
+        for (String name : models.keySet()) {
+            modelComboBox.addItem(name);
+        }
+        modelComboBox.addActionListener(e -> ensureModel());
+        if (modelComboBox.getItemCount() > 0) {
+            modelComboBox.setSelectedIndex(0);
+        }
 
         loadInputDevices();
 
@@ -64,13 +94,22 @@ public class TranscriberApp extends JFrame {
     }
 
     private void ensureModel() {
-        if (!modelDir.exists()) {
+        String sel = (String) modelComboBox.getSelectedItem();
+        if (sel == null) {
+            return;
+        }
+        ModelInfo info = models.get(sel);
+        currentModelDir = new File(modelsBaseDir, info.dirName);
+        if (!currentModelDir.exists()) {
             progressBar.setVisible(true);
+            modelReady = false;
+            updateStartButtonState();
             SwingWorker<Void, Integer> worker = new SwingWorker<Void, Integer>() {
                 @Override
                 protected Void doInBackground() throws Exception {
-                    String url = "https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip";
-                    Path zipPath = Paths.get("model.zip");
+                    String url = info.url;
+                    modelsBaseDir.mkdirs();
+                    Path zipPath = modelsBaseDir.toPath().resolve(info.dirName + ".zip");
                     HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
                     int length = conn.getContentLength();
                     try (InputStream in = conn.getInputStream();
@@ -86,7 +125,7 @@ public class TranscriberApp extends JFrame {
                             }
                         }
                     }
-                    unzip(zipPath.toFile(), modelDir);
+                    unzip(zipPath.toFile(), currentModelDir);
                     Files.delete(zipPath);
                     return null;
                 }
@@ -183,7 +222,7 @@ public class TranscriberApp extends JFrame {
             return;
         }
         recognitionThread = new Thread(() -> {
-            try (Model model = new Model(locateModelPath(modelDir).getAbsolutePath());
+            try (Model model = new Model(locateModelPath(currentModelDir).getAbsolutePath());
                  FileWriter writer = new FileWriter(outputFile, true)) {
                 Recognizer recognizer = new Recognizer(model, 16000.0f);
                 AudioFormat format = new AudioFormat(16000.0f, 16, 1, true, false);
