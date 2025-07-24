@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.vostts.VosTtsController">
+    <top>
+        <VBox spacing="4" alignment="CENTER">
+            <Label fx:id="titleLabel" text="vos-tts" styleClass="title"/>
+            <Label fx:id="sessionLabel" text="Session: -"/>
+        </VBox>
+    </top>
+    <center>
+        <VBox spacing="8" alignment="CENTER">
+            <Button fx:id="startButton" text="Start Live Transcription" maxWidth="Infinity" onAction="#onStart" />
+            <VBox fx:id="transcriptBox" prefHeight="200" spacing="2" />
+        </VBox>
+    </center>
+    <bottom>
+        <HBox spacing="8" alignment="CENTER_LEFT" styleClass="bottom-bar">
+            <Button fx:id="pauseButton" text="Pause" disable="true" onAction="#onPause" />
+            <TextField fx:id="searchField" promptText="Search" HBox.hgrow="ALWAYS" />
+            <Button fx:id="saveButton" text="Save" />
+            <ComboBox fx:id="exportCombo" promptText="Export" />
+        </HBox>
+    </bottom>
+</BorderPane>
