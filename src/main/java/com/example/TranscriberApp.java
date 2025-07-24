@@ -20,6 +20,7 @@ public class TranscriberApp extends JFrame {
     private final JLabel lastWordsLabel = new JLabel("...");
     private final JProgressBar progressBar = new JProgressBar(0, 100);
     private final JProgressBar volumeBar = new JProgressBar(0, 100);
+    private final JComboBox<Mixer.Info> deviceComboBox = new JComboBox<>();
     private final File modelDir = new File("model");
     private final File outputFile = new File("transcript.txt");
     private final JButton startStopButton = new JButton("Start");
@@ -45,8 +46,11 @@ public class TranscriberApp extends JFrame {
         startStopButton.setEnabled(false);
         volumeBar.setPreferredSize(new Dimension(100, 16));
         bottom.add(volumeBar);
+        bottom.add(deviceComboBox);
         bottom.add(startStopButton);
         add(bottom, BorderLayout.SOUTH);
+
+        loadInputDevices();
 
         startStopButton.addActionListener(e -> {
             if (!running) {
@@ -97,13 +101,13 @@ public class TranscriberApp extends JFrame {
                 protected void done() {
                     progressBar.setVisible(false);
                     modelReady = true;
-                    startStopButton.setEnabled(true);
+                    updateStartButtonState();
                 }
             };
             worker.execute();
         } else {
             modelReady = true;
-            startStopButton.setEnabled(true);
+            updateStartButtonState();
         }
     }
 
@@ -144,6 +148,36 @@ public class TranscriberApp extends JFrame {
         return dir;
     }
 
+    private void loadInputDevices() {
+        deviceComboBox.removeAllItems();
+        AudioFormat format = new AudioFormat(16000.0f, 16, 1, true, false);
+        DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
+        for (Mixer.Info mi : AudioSystem.getMixerInfo()) {
+            Mixer mixer = AudioSystem.getMixer(mi);
+            if (mixer.isLineSupported(info)) {
+                deviceComboBox.addItem(mi);
+            }
+        }
+        deviceComboBox.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                if (value instanceof Mixer.Info) {
+                    setText(((Mixer.Info) value).getName());
+                }
+                return this;
+            }
+        });
+        if (deviceComboBox.getItemCount() > 0) {
+            deviceComboBox.setSelectedIndex(0);
+        }
+        updateStartButtonState();
+    }
+
+    private void updateStartButtonState() {
+        startStopButton.setEnabled(modelReady && deviceComboBox.getItemCount() > 0);
+    }
+
     private void startRecognition() {
         if (!modelReady || running) {
             return;
@@ -154,7 +188,14 @@ public class TranscriberApp extends JFrame {
                 Recognizer recognizer = new Recognizer(model, 16000.0f);
                 AudioFormat format = new AudioFormat(16000.0f, 16, 1, true, false);
                 DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
-                TargetDataLine line = (TargetDataLine) AudioSystem.getLine(info);
+                Mixer.Info selected = (Mixer.Info) deviceComboBox.getSelectedItem();
+                TargetDataLine line;
+                if (selected != null) {
+                    Mixer mixer = AudioSystem.getMixer(selected);
+                    line = (TargetDataLine) mixer.getLine(info);
+                } else {
+                    line = (TargetDataLine) AudioSystem.getLine(info);
+                }
                 line.open(format);
                 line.start();
                 byte[] buffer = new byte[4096];
