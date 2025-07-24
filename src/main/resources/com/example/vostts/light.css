@@ -1,0 +1,14 @@
+.root {
+    -fx-base: white;
+    -fx-text-fill: black;
+    --bg-color: #ffffff;
+    --text-color: #000000;
+}
+.title {
+    -fx-font-size: 20pt;
+    -fx-font-weight: bold;
+}
+.bottom-bar {
+    -fx-padding: 4 8 4 8;
+    -fx-background-color: linear-gradient(to top, #e0e0e0, #f8f8f8);
+}

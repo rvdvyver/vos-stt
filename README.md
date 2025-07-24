@@ -1,21 +1,18 @@
 # vos-stt
 
-This project demonstrates a simple Java Swing application that performs live
-speech transcription using the [VOSK](https://alphacephei.com/vosk/) library.
-The application listens to the default system audio device and appends
-recognized speech to `transcript.txt`. While running it shows the current
-partial transcription and a small volume bar so you can see that the microphone
-is active.
+This project now provides a minimal JavaFX application called **vos-tts** that
+shows live speech transcription in a compact window. The transcription is
+generated using a mocked service for demonstration purposes and appended to a
+session file.
 
 ## Usage
 
-The project is built with Maven. To run the UI:
+Launch the JavaFX UI with:
 
 ```bash
 mvn compile exec:java
 ```
 
-When launched, the UI shows a drop down of a few demo models. The selected
-model is stored under the `models` directory. If the chosen model is not
-present it is downloaded automatically and extracted. A progress bar indicates
-the download state.
+Click **Start Live Transcription** to begin a session. Lines of text will
+appear in large font as the mock recogniser generates them. A file named after
+the session timestamp is written to disk.
