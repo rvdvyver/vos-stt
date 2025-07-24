@@ -17,9 +17,7 @@
     <bottom>
         <HBox spacing="8" alignment="CENTER_LEFT" styleClass="bottom-bar">
             <Button fx:id="pauseButton" text="Pause" disable="true" onAction="#onPause" />
-            <TextField fx:id="searchField" promptText="Search" HBox.hgrow="ALWAYS" />
-            <Button fx:id="saveButton" text="Save" />
-            <ComboBox fx:id="exportCombo" promptText="Export" />
+            <ComboBox fx:id="deviceCombo" promptText="Audio Input" />
         </HBox>
     </bottom>
 </BorderPane>

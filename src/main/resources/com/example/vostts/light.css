@@ -1,8 +1,6 @@
 .root {
     -fx-base: white;
     -fx-text-fill: black;
-    --bg-color: #ffffff;
-    --text-color: #000000;
 }
 .title {
     -fx-font-size: 20pt;
