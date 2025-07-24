@@ -47,7 +47,6 @@ public class VosTtsController {
         updateSession("-");
         loadInputDevices();
         startButton.setDisable(true);
-        ensureModel();
     }
 
     @FXML
@@ -183,32 +182,17 @@ public class VosTtsController {
         }
     }
 
-    private void ensureModel() {
-        modelDir = new File("models/vosk-model-en-us-0.22");
-        if (!isModelValid(modelDir)) {
-            showDownloadSplash();
-        } else {
-            modelReady = true;
-            startButton.setDisable(false);
-        }
-    }
-
-    private void showDownloadSplash() {
-        ProgressBar bar = new ProgressBar(0);
-        Label label = new Label("Downloading model...");
-        VBox box = new VBox(10, label, bar);
-        box.setStyle("-fx-padding: 20;");
-        Stage stage = new Stage();
-        stage.setScene(new Scene(box));
-        stage.setTitle("Model Download");
-        stage.show();
-
-        Task<Void> task = new Task<>() {
+    /**
+     * Create a download task for the Vosk model. The task updates its progress
+     * as bytes are downloaded and unzipped.
+     */
+    public Task<Void> createModelDownloadTask(File targetDir) {
+        return new Task<>() {
             @Override
             protected Void call() throws Exception {
                 String url = "https://alphacephei.com/vosk/models/vosk-model-en-us-0.22.zip";
-                modelDir.getParentFile().mkdirs();
-                Path zipPath = modelDir.toPath().resolveSibling("vosk-model-en-us-0.22.zip");
+                targetDir.getParentFile().mkdirs();
+                Path zipPath = targetDir.toPath().resolveSibling("vosk-model-en-us-0.22.zip");
                 HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
                 int length = conn.getContentLength();
                 try (InputStream in = conn.getInputStream();
@@ -224,21 +208,14 @@ public class VosTtsController {
                         }
                     }
                 }
-                unzip(zipPath.toFile(), modelDir);
+                unzip(zipPath.toFile(), targetDir);
                 Files.delete(zipPath);
                 return null;
             }
         };
-        bar.progressProperty().bind(task.progressProperty());
-        task.setOnSucceeded(e -> {
-            stage.close();
-            modelReady = isModelValid(modelDir);
-            startButton.setDisable(!modelReady);
-        });
-        executor.submit(task);
     }
 
-    private void unzip(File zipFile, File targetDir) throws IOException {
+    public static void unzip(File zipFile, File targetDir) throws IOException {
         targetDir.mkdirs();
         try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile))) {
             ZipEntry entry;
@@ -261,7 +238,7 @@ public class VosTtsController {
         }
     }
 
-    private File locateModelPath(File dir) {
+    private static File locateModelPath(File dir) {
         if (new File(dir, "am").exists()) {
             return dir;
         }
@@ -275,8 +252,21 @@ public class VosTtsController {
         return dir;
     }
 
-    private boolean isModelValid(File dir) {
+    public static boolean isModelValid(File dir) {
         File path = locateModelPath(dir);
         return new File(path, "am").exists();
+    }
+
+    /** Set the directory containing the speech model. */
+    public void setModelDir(File dir) {
+        this.modelDir = dir;
+    }
+
+    /**
+     * Mark the speech model as ready and enable the start button accordingly.
+     */
+    public void setModelReady(boolean ready) {
+        this.modelReady = ready;
+        startButton.setDisable(!ready);
     }
 }
