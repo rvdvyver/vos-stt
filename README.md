@@ -2,8 +2,10 @@
 
 This project demonstrates a simple Java Swing application that performs live
 speech transcription using the [VOSK](https://alphacephei.com/vosk/) library.
-The application listens to the default system audio device, displays recognized
-speech and appends it to `transcript.txt`.
+The application listens to the default system audio device and appends
+recognized speech to `transcript.txt`. While running it shows the current
+partial transcription and a small volume bar so you can see that the microphone
+is active.
 
 ## Usage
 

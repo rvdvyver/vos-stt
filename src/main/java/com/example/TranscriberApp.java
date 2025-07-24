@@ -19,6 +19,7 @@ public class TranscriberApp extends JFrame {
     private final JTextArea textArea = new JTextArea();
     private final JLabel lastWordsLabel = new JLabel("...");
     private final JProgressBar progressBar = new JProgressBar(0, 100);
+    private final JProgressBar volumeBar = new JProgressBar(0, 100);
     private final File modelDir = new File("model");
     private final File outputFile = new File("transcript.txt");
     private final JButton startStopButton = new JButton("Start");
@@ -33,6 +34,7 @@ public class TranscriberApp extends JFrame {
         textArea.setEditable(false);
         JScrollPane scrollPane = new JScrollPane(textArea);
         progressBar.setStringPainted(true);
+        lastWordsLabel.setFont(lastWordsLabel.getFont().deriveFont(16f));
         JPanel top = new JPanel(new BorderLayout());
         top.add(lastWordsLabel, BorderLayout.CENTER);
         top.add(progressBar, BorderLayout.SOUTH);
@@ -41,6 +43,8 @@ public class TranscriberApp extends JFrame {
 
         JPanel bottom = new JPanel(new FlowLayout(FlowLayout.CENTER));
         startStopButton.setEnabled(false);
+        volumeBar.setPreferredSize(new Dimension(100, 16));
+        bottom.add(volumeBar);
         bottom.add(startStopButton);
         add(bottom, BorderLayout.SOUTH);
 
@@ -159,6 +163,8 @@ public class TranscriberApp extends JFrame {
                 while (running && !Thread.currentThread().isInterrupted()) {
                     int n = line.read(buffer, 0, buffer.length);
                     if (n < 0) break;
+                    final int level = calculateVolumeLevel(buffer, n);
+                    SwingUtilities.invokeLater(() -> volumeBar.setValue(level));
                     if (recognizer.acceptWaveForm(buffer, n)) {
                         String result = recognizer.getResult();
                         handleResult(result, writer);
@@ -173,7 +179,10 @@ public class TranscriberApp extends JFrame {
                 ex.printStackTrace();
             } finally {
                 running = false;
-                SwingUtilities.invokeLater(() -> startStopButton.setText("Start"));
+                SwingUtilities.invokeLater(() -> {
+                    startStopButton.setText("Start");
+                    volumeBar.setValue(0);
+                });
             }
         });
         recognitionThread.start();
@@ -184,6 +193,17 @@ public class TranscriberApp extends JFrame {
         if (recognitionThread != null) {
             recognitionThread.interrupt();
         }
+        SwingUtilities.invokeLater(() -> volumeBar.setValue(0));
+    }
+
+    private int calculateVolumeLevel(byte[] audio, int length) {
+        long sum = 0;
+        for (int i = 0; i < length; i += 2) {
+            int sample = (audio[i + 1] << 8) | (audio[i] & 0xff);
+            sum += sample * sample;
+        }
+        double rms = Math.sqrt(sum / (length / 2.0));
+        return (int) Math.min(100, rms * 100 / 32768);
     }
 
     private void handleResult(String json, FileWriter writer) throws IOException {
