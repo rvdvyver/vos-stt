@@ -15,8 +15,7 @@ The project is built with Maven. To run the UI:
 mvn compile exec:java
 ```
 
-On startup the program checks for a speech model inside the `model` directory.
-If the model is missing it attempts to download
-`vosk-model-small-en-us-0.15.zip` and extract it. The archive contains a
-subdirectory with the actual model files which the application now detects
-automatically. A progress bar is shown during the download.
+When launched, the UI shows a drop down of a few demo models. The selected
+model is stored under the `models` directory. If the chosen model is not
+present it is downloaded automatically and extracted. A progress bar indicates
+the download state.
