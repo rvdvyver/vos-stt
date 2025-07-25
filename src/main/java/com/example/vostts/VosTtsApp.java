@@ -30,12 +30,13 @@ public class VosTtsApp extends Application {
         controller.setModelDir(modelDir);
         LOG.fine(() -> "Using model directory: " + modelDir.getAbsolutePath());
 
+        stage.initStyle(StageStyle.UNDECORATED);
+
         if (VosTtsController.isModelValid(modelDir)) {
             LOG.info("Speech model found");
             controller.setModelReady(true);
             Scene scene = new Scene(root, 400, 300);
             scene.getStylesheets().add(getClass().getResource("/com/example/vostts/dark.css").toExternalForm());
-            stage.setTitle("vos-tts");
             stage.setScene(scene);
             stage.show();
         } else {

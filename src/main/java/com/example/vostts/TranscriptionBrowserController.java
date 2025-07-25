@@ -9,6 +9,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.Parent;
@@ -79,7 +80,7 @@ public class TranscriptionBrowserController {
             controller.loadSession(selected);
             Stage stage = new Stage();
             stage.initModality(Modality.APPLICATION_MODAL);
-            stage.setTitle("Transcript Viewer");
+            stage.initStyle(StageStyle.UNDECORATED);
             Scene scene = new Scene(root, 600, 400);
             scene.getStylesheets().add(getClass().getResource("/com/example/vostts/dark.css").toExternalForm());
             stage.setScene(scene);
@@ -109,6 +110,12 @@ public class TranscriptionBrowserController {
     private void onExport() {
         // Placeholder: real export not implemented
         showError("Export not implemented in demo.");
+    }
+
+    @FXML
+    private void onClose() {
+        Stage stage = (Stage) table.getScene().getWindow();
+        stage.close();
     }
 
     private void showError(String msg) {
