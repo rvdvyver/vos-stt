@@ -239,21 +239,35 @@ public class VosTtsController {
                 Path zipPath = targetDir.toPath().resolveSibling("vosk-model-en-us-0.22.zip");
                 HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
                 int length = conn.getContentLength();
+                updateMessage("0 MB/s");
                 try (InputStream in = conn.getInputStream();
                      FileOutputStream out = new FileOutputStream(zipPath.toFile())) {
                     byte[] buffer = new byte[4096];
                     int bytesRead;
                     long total = 0;
+                    long lastTotal = 0;
+                    long lastTime = System.nanoTime();
                     while ((bytesRead = in.read(buffer)) != -1) {
                         out.write(buffer, 0, bytesRead);
                         total += bytesRead;
                         if (length > 0) {
                             updateProgress(total, length);
                         }
+                        long now = System.nanoTime();
+                        if (now - lastTime > 1_000_000_000L) {
+                            double mb = (total - lastTotal) / (1024.0 * 1024.0);
+                            double mbps = mb / ((now - lastTime) / 1_000_000_000.0);
+                            updateMessage(String.format("%.1f MB/s", mbps));
+                            lastTime = now;
+                            lastTotal = total;
+                        }
                     }
                 }
                 unzip(zipPath.toFile(), targetDir);
                 Files.delete(zipPath);
+                if (!isModelValid(targetDir)) {
+                    throw new IOException("Downloaded model is invalid");
+                }
                 LOG.info("Model download complete");
                 return null;
             }
@@ -305,8 +319,8 @@ public class VosTtsController {
 
     /** Set the directory containing the speech model. */
     public void setModelDir(File dir) {
-        this.modelDir = dir;
-        LOG.fine(() -> "Model directory set to " + dir);
+        this.modelDir = locateModelPath(dir);
+        LOG.fine(() -> "Model directory set to " + this.modelDir);
     }
 
     /**
