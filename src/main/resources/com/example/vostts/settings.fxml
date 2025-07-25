@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml" spacing="10" alignment="CENTER" fx:controller="com.example.vostts.SettingsController" styleClass="root-pane">
+    <HBox spacing="8" alignment="CENTER_LEFT">
+        <Label text="Wrap length:" />
+        <TextField fx:id="wrapField" prefWidth="80" />
+    </HBox>
+    <HBox spacing="8" alignment="CENTER_LEFT">
+        <Label text="Timeout (s):" />
+        <TextField fx:id="timeoutField" prefWidth="80" />
+    </HBox>
+    <HBox spacing="8" alignment="CENTER_LEFT">
+        <Label text="Input device:" />
+        <ComboBox fx:id="deviceCombo" prefWidth="180" />
+    </HBox>
+    <HBox spacing="8" alignment="CENTER_RIGHT">
+        <Button text="Save" onAction="#onSave" />
+        <Button fx:id="closeButton" text="Close" onAction="#onClose" />
+    </HBox>
+</VBox>

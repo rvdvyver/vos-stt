@@ -29,6 +29,14 @@
     -fx-background-color: #dddddd;
 }
 
+.close-button {
+    -fx-text-fill: #aa0000;
+}
+
+.close-button:hover {
+    -fx-background-color: #ffcccc;
+}
+
 .control-button {
     -fx-background-color: transparent;
 }

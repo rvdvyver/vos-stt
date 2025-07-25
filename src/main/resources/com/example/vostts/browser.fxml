@@ -3,7 +3,14 @@
 <?import javafx.scene.layout.*?>
 <BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.vostts.TranscriptionBrowserController">
     <top>
-        <Label text="Transcription Browser" styleClass="title" BorderPane.alignment="CENTER" />
+        <BorderPane styleClass="top-bar">
+            <center>
+                <Label text="Transcription Browser" styleClass="title" />
+            </center>
+            <right>
+                <Button text="✕" onAction="#onClose" styleClass="icon-button close-button" />
+            </right>
+        </BorderPane>
     </top>
     <center>
         <TableView fx:id="table" prefHeight="400">

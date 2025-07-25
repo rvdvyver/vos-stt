@@ -10,8 +10,9 @@
             <right>
                 <HBox spacing="8" alignment="CENTER_RIGHT">
                     <Button text="📁" onAction="#onBrowse" styleClass="icon-button" />
-                    <Button text="⚙" onAction="#onSettings" styleClass="icon-button" />
+                    <Button fx:id="settingsButton" text="⚙" onAction="#onSettings" styleClass="icon-button" />
                     <Button text="🌗" onAction="#onToggleTheme" styleClass="icon-button" />
+                    <Button text="✕" onAction="#onCloseApp" styleClass="icon-button close-button" />
                 </HBox>
             </right>
         </BorderPane>
@@ -25,9 +26,6 @@
     <bottom>
         <HBox spacing="16" alignment="CENTER" styleClass="bottom-bar">
             <Button fx:id="startButton" text="Start" onAction="#onStart" styleClass="control-button" />
-            <Button fx:id="pauseButton" text="Paused" onAction="#onPauseResume" styleClass="control-button" />
-            <Button text="Save" onAction="#onSave" styleClass="control-button" />
-            <Button text="Timeout" onAction="#onAutoStop" styleClass="control-button" />
         </HBox>
     </bottom>
 </BorderPane>

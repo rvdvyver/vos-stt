@@ -31,6 +31,14 @@
     -fx-background-color: #2A2A2A;
 }
 
+.close-button {
+    -fx-text-fill: #FF6666;
+}
+
+.close-button:hover {
+    -fx-background-color: #AA2222;
+}
+
 .control-button {
     -fx-background-color: transparent;
     -fx-text-fill: #EEEEEE;
