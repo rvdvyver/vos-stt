@@ -63,6 +63,8 @@ public class VosTtsController {
     private long pauseAccum;
     private long pauseStarted;
     private boolean darkMode = true;
+    /** Maximum characters before inserting a line break. */
+    private int wrapChars = 35;
 
     @FXML
     private void initialize() {
@@ -116,8 +118,19 @@ public class VosTtsController {
 
     @FXML
     private void onSettings() {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION, "Settings not implemented in demo.", ButtonType.OK);
-        alert.showAndWait();
+        TextInputDialog dialog = new TextInputDialog(Integer.toString(wrapChars));
+        dialog.setTitle("Settings");
+        dialog.setHeaderText("Wrap length for current line");
+        dialog.setContentText("Characters before wrap:");
+        dialog.showAndWait().ifPresent(str -> {
+            try {
+                int val = Integer.parseInt(str.trim());
+                if (val > 0) {
+                    wrapChars = val;
+                }
+            } catch (NumberFormatException ignored) {
+            }
+        });
     }
 
     @FXML
@@ -297,7 +310,7 @@ public class VosTtsController {
             LOG.fine(() -> "Recognised: " + text);
             writeLine(text);
             if (partialLabel != null) {
-                Platform.runLater(() -> partialLabel.setText(text));
+                Platform.runLater(() -> partialLabel.setText(wrapDisplay(text)));
             }
         }
     }
@@ -307,7 +320,7 @@ public class VosTtsController {
         JSONObject obj = new JSONObject(json);
         String partial = obj.optString("partial");
         if (!partial.isEmpty()) {
-            Platform.runLater(() -> partialLabel.setText(partial));
+            Platform.runLater(() -> partialLabel.setText(wrapDisplay(partial)));
         }
     }
 
@@ -322,19 +335,46 @@ public class VosTtsController {
         timerLabel.setText(String.format("%02d:%02d:%02d", h, m, s));
     }
 
+    /**
+     * Wrap the provided text so that no line exceeds {@code wrapChars} characters.
+     */
+    private String wrapDisplay(String text) {
+        if (text.length() <= wrapChars) {
+            return text;
+        }
+        StringBuilder sb = new StringBuilder();
+        int start = 0;
+        while (start < text.length()) {
+            int end = Math.min(start + wrapChars, text.length());
+            int space = text.lastIndexOf(' ', end);
+            if (space > start && space < end) {
+                end = space + 1;
+            }
+            sb.append(text, start, end).append('\n');
+            start = end;
+        }
+        if (sb.length() > 0 && sb.charAt(sb.length() - 1) == '\n') {
+            sb.setLength(sb.length() - 1);
+        }
+        return sb.toString();
+    }
+
     private void writeLine(String text) {
+        String[] parts = wrapDisplay(text).split("\n");
         Platform.runLater(() -> {
-            Label line = new Label(text);
-            line.setWrapText(true);
-            line.setAlignment(Pos.CENTER);
-            line.setMaxWidth(Double.MAX_VALUE);
-            line.getStyleClass().add("transcript-new");
-            transcriptBox.getChildren().add(line);
-            FadeTransition ft = new FadeTransition(Duration.millis(300), line);
-            ft.setFromValue(0);
-            ft.setToValue(1);
-            ft.play();
-            lines.addLast(line);
+            for (String p : parts) {
+                Label line = new Label(p);
+                line.setWrapText(true);
+                line.setAlignment(Pos.CENTER);
+                line.setMaxWidth(Double.MAX_VALUE);
+                line.getStyleClass().add("transcript-new");
+                transcriptBox.getChildren().add(line);
+                FadeTransition ft = new FadeTransition(Duration.millis(300), line);
+                ft.setFromValue(0);
+                ft.setToValue(1);
+                ft.play();
+                lines.addLast(line);
+            }
             while (lines.size() > 3) {
                 Label old = lines.removeFirst();
                 transcriptBox.getChildren().remove(old);

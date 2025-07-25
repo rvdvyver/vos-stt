@@ -45,6 +45,14 @@
                     <mainClass>com.example.vostts.VosTtsApp</mainClass>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>0.0.8</version>
+                <configuration>
+                    <mainClass>com.example.vostts.VosTtsApp</mainClass>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>
