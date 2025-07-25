@@ -16,8 +16,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import com.example.logging.LoggingConfig;
 
 public class TranscriberApp extends JFrame {
+    private static final Logger LOG = Logger.getLogger(TranscriberApp.class.getName());
     private final JTextArea textArea = new JTextArea();
     private final JLabel lastWordsLabel = new JLabel("...");
     private final JProgressBar progressBar = new JProgressBar(0, 100);
@@ -224,11 +228,13 @@ public class TranscriberApp extends JFrame {
 
     private void startRecognition() {
         if (!modelReady || running) {
+            LOG.warning("Attempted to start recognition but model not ready or already running");
             return;
         }
         recognitionThread = new Thread(() -> {
             try (Model model = new Model(locateModelPath(currentModelDir).getAbsolutePath());
                  FileWriter writer = new FileWriter(outputFile, true)) {
+                LOG.info("Recognition thread started");
                 Recognizer recognizer = new Recognizer(model, 16000.0f);
                 AudioFormat format = new AudioFormat(16000.0f, 16, 1, true, false);
                 DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
@@ -261,13 +267,14 @@ public class TranscriberApp extends JFrame {
                 line.stop();
                 line.close();
             } catch (Exception ex) {
-                ex.printStackTrace();
+                LOG.log(Level.SEVERE, "Recognition error", ex);
             } finally {
                 running = false;
                 SwingUtilities.invokeLater(() -> {
                     startStopButton.setText("Start");
                     volumeBar.setValue(0);
                 });
+                LOG.fine("Recognition thread finished");
             }
         });
         recognitionThread.start();
@@ -275,6 +282,7 @@ public class TranscriberApp extends JFrame {
 
     private void stopRecognition() {
         running = false;
+        LOG.info("Recognition stopping");
         if (recognitionThread != null) {
             recognitionThread.interrupt();
         }
@@ -295,6 +303,7 @@ public class TranscriberApp extends JFrame {
         JSONObject obj = new JSONObject(json);
         String text = obj.optString("text");
         if (!text.isEmpty()) {
+            LOG.fine(() -> "Recognised: " + text);
             appendText(text, writer);
         }
     }
@@ -318,6 +327,8 @@ public class TranscriberApp extends JFrame {
     }
 
     public static void main(String[] args) {
+        LoggingConfig.configure();
+        LOG.info("Launching TranscriberApp");
         SwingUtilities.invokeLater(() -> new TranscriberApp().setVisible(true));
     }
 }

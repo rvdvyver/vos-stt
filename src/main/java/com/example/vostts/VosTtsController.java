@@ -26,8 +26,11 @@ import java.util.Deque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class VosTtsController {
+    private static final Logger LOG = Logger.getLogger(VosTtsController.class.getName());
     @FXML private Label sessionLabel;
     @FXML private Button startButton;
     @FXML private Button pauseButton;
@@ -47,13 +50,16 @@ public class VosTtsController {
         updateSession("-");
         loadInputDevices();
         startButton.setDisable(true);
+        LOG.fine("Controller initialised");
     }
 
     @FXML
     private void onStart() {
         if (running) {
+            LOG.info("Stopping transcription session");
             stopTranscription();
         } else {
+            LOG.info("Starting transcription session");
             startTranscription();
         }
     }
@@ -61,22 +67,26 @@ public class VosTtsController {
     @FXML
     private void onPause() {
         running = !running;
+        LOG.fine(() -> "Paused state: " + !running);
         pauseButton.setText(running ? "Pause" : "Resume");
     }
 
     private void startTranscription() {
         if (!modelReady) {
+            LOG.warning("Attempted to start transcription before model ready");
             return;
         }
         updateSession(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")));
         startButton.setText("Stop");
         pauseButton.setDisable(false);
         running = true;
+        LOG.info("Transcription started");
         transcriptionTask = executor.submit(this::runRecognition);
     }
 
     private void stopTranscription() {
         running = false;
+        LOG.info("Transcription stopping");
         if (transcriptionTask != null) {
             transcriptionTask.cancel(true);
         }
@@ -85,7 +95,7 @@ public class VosTtsController {
                 writer.close();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.log(Level.WARNING, "Error closing output", e);
         }
         startButton.setText("Start Live Transcription");
         pauseButton.setDisable(true);
@@ -93,10 +103,12 @@ public class VosTtsController {
 
     private void updateSession(String id) {
         sessionLabel.setText("Session: " + id);
+        LOG.fine(() -> "Session updated: " + id);
     }
 
     private void runRecognition() {
         File outFile = new File("transcript_" + sessionLabel.getText() + ".txt");
+        LOG.fine(() -> "Writing transcript to " + outFile.getAbsolutePath());
         try (Model model = new Model(locateModelPath(modelDir).getAbsolutePath());
              BufferedWriter bw = new BufferedWriter(new FileWriter(outFile))) {
             writer = bw;
@@ -114,6 +126,7 @@ public class VosTtsController {
             line.open(format);
             line.start();
             byte[] buffer = new byte[4096];
+            LOG.fine("Recognition loop started");
             while (!Thread.currentThread().isInterrupted()) {
                 int n = line.read(buffer, 0, buffer.length);
                 if (n < 0) break;
@@ -127,13 +140,14 @@ public class VosTtsController {
             line.stop();
             line.close();
         } catch (Exception ex) {
-            ex.printStackTrace();
+            LOG.log(Level.SEVERE, "Recognition error", ex);
         } finally {
             Platform.runLater(() -> {
                 running = false;
                 startButton.setText("Start Live Transcription");
                 pauseButton.setDisable(true);
             });
+            LOG.fine("Recognition loop finished");
         }
     }
 
@@ -141,6 +155,7 @@ public class VosTtsController {
         JSONObject obj = new JSONObject(json);
         String text = obj.optString("text");
         if (!text.isEmpty()) {
+            LOG.fine(() -> "Recognised: " + text);
             writeLine(text);
         }
     }
@@ -162,7 +177,7 @@ public class VosTtsController {
                 writer.newLine();
                 writer.flush();
             } catch (IOException e) {
-                e.printStackTrace();
+                LOG.log(Level.WARNING, "Failed writing line", e);
             }
         }
     }
@@ -180,6 +195,7 @@ public class VosTtsController {
         if (!deviceCombo.getItems().isEmpty()) {
             deviceCombo.getSelectionModel().selectFirst();
         }
+        LOG.fine(() -> "Loaded " + deviceCombo.getItems().size() + " input devices");
     }
 
     /**
@@ -191,6 +207,7 @@ public class VosTtsController {
             @Override
             protected Void call() throws Exception {
                 String url = "https://alphacephei.com/vosk/models/vosk-model-en-us-0.22.zip";
+                LOG.info("Downloading model from " + url);
                 targetDir.getParentFile().mkdirs();
                 Path zipPath = targetDir.toPath().resolveSibling("vosk-model-en-us-0.22.zip");
                 HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
@@ -210,6 +227,7 @@ public class VosTtsController {
                 }
                 unzip(zipPath.toFile(), targetDir);
                 Files.delete(zipPath);
+                LOG.info("Model download complete");
                 return null;
             }
         };
@@ -217,6 +235,7 @@ public class VosTtsController {
 
     public static void unzip(File zipFile, File targetDir) throws IOException {
         targetDir.mkdirs();
+        LOG.fine(() -> "Unzipping " + zipFile + " to " + targetDir);
         try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile))) {
             ZipEntry entry;
             byte[] buffer = new byte[4096];
@@ -260,6 +279,7 @@ public class VosTtsController {
     /** Set the directory containing the speech model. */
     public void setModelDir(File dir) {
         this.modelDir = dir;
+        LOG.fine(() -> "Model directory set to " + dir);
     }
 
     /**
@@ -268,5 +288,6 @@ public class VosTtsController {
     public void setModelReady(boolean ready) {
         this.modelReady = ready;
         startButton.setDisable(!ready);
+        LOG.fine(() -> "Model ready: " + ready);
     }
 }
