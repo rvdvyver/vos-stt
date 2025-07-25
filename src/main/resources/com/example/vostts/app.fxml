@@ -11,13 +11,12 @@
     <center>
         <VBox spacing="8" alignment="CENTER">
             <Button fx:id="startButton" text="Start Live Transcription" maxWidth="Infinity" onAction="#onStart" />
-            <Label fx:id="partialLabel" text="" styleClass="partial" />
-            <VBox fx:id="transcriptBox" prefHeight="200" spacing="2" />
+            <Label fx:id="partialLabel" text="" styleClass="partial" alignment="CENTER" />
+            <VBox fx:id="transcriptBox" prefHeight="200" spacing="2" alignment="CENTER" />
         </VBox>
     </center>
     <bottom>
         <HBox spacing="8" alignment="CENTER_LEFT" styleClass="bottom-bar">
-            <Button fx:id="pauseButton" text="Pause" disable="true" onAction="#onPause" />
             <ComboBox fx:id="deviceCombo" promptText="Audio Input" />
             <Button text="🗂 Browse Sessions" onAction="#onBrowse" />
         </HBox>

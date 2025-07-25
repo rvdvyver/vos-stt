@@ -6,6 +6,7 @@ import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
+import javafx.geometry.Pos;
 import javafx.stage.Stage;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -36,7 +37,6 @@ public class VosTtsController {
     private static final Logger LOG = Logger.getLogger(VosTtsController.class.getName());
     @FXML private Label sessionLabel;
     @FXML private Button startButton;
-    @FXML private Button pauseButton;
     @FXML private Label partialLabel;
     @FXML private VBox transcriptBox;
     @FXML private ComboBox<Mixer.Info> deviceCombo;
@@ -50,6 +50,7 @@ public class VosTtsController {
     private BufferedWriter writer;
     private File modelDir;
     private boolean modelReady = false;
+    private String currentSessionId = "-";
 
     @FXML
     private void initialize() {
@@ -58,6 +59,8 @@ public class VosTtsController {
         startButton.setDisable(true);
         if (partialLabel != null) {
             partialLabel.setText("");
+            partialLabel.setAlignment(Pos.CENTER);
+            partialLabel.setMaxWidth(Double.MAX_VALUE);
         }
         LOG.fine("Controller initialised");
     }
@@ -71,13 +74,6 @@ public class VosTtsController {
             LOG.info("Starting transcription session");
             startTranscription();
         }
-    }
-
-    @FXML
-    private void onPause() {
-        running = !running;
-        LOG.fine(() -> "Paused state: " + !running);
-        pauseButton.setText(running ? "Pause" : "Resume");
     }
 
     @FXML
@@ -109,7 +105,7 @@ public class VosTtsController {
         }
         updateSession(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")));
         startButton.setText("Stop");
-        pauseButton.setDisable(false);
+        deviceCombo.setDisable(true);
         running = true;
         if (partialLabel != null) {
             partialLabel.setText("");
@@ -129,19 +125,22 @@ public class VosTtsController {
         // starts but prevents closing the stream while it may still be in use.
         writer = null;
         startButton.setText("Start Live Transcription");
-        pauseButton.setDisable(true);
+        deviceCombo.setDisable(false);
         if (partialLabel != null) {
             partialLabel.setText("");
         }
     }
 
     private void updateSession(String id) {
+        currentSessionId = id;
         sessionLabel.setText("Session: " + id);
         LOG.fine(() -> "Session updated: " + id);
     }
 
     private void runRecognition() {
-        File outFile = new File("transcript_" + sessionLabel.getText() + ".txt");
+        Path base = Paths.get(System.getProperty("user.home"), "vos-stt", "sessions", currentSessionId);
+        base.toFile().mkdirs();
+        File outFile = base.resolve("transcript.txt").toFile();
         LOG.fine(() -> "Writing transcript to " + outFile.getAbsolutePath());
         try (Model model = new Model(locateModelPath(modelDir).getAbsolutePath());
              BufferedWriter bw = new BufferedWriter(new FileWriter(outFile))) {
@@ -182,7 +181,7 @@ public class VosTtsController {
             Platform.runLater(() -> {
                 running = false;
                 startButton.setText("Start Live Transcription");
-                pauseButton.setDisable(true);
+                deviceCombo.setDisable(false);
             });
             // Ensure the writer reference is cleared after the session ends.
             writer = null;
@@ -211,13 +210,20 @@ public class VosTtsController {
         }
     }
 
+    private static final int LINE_LENGTH = 40;
+
     private void writeLine(String text) {
         Platform.runLater(() -> {
-            Label line = new Label(text);
-            line.setStyle("-fx-font-size: 16pt; -fx-font-weight: bold;");
-            transcriptBox.getChildren().add(line);
-            lines.addLast(line);
-            if (lines.size() > 3) {
+            for (int i = 0; i < text.length(); i += LINE_LENGTH) {
+                String chunk = text.substring(i, Math.min(i + LINE_LENGTH, text.length()));
+                Label line = new Label(chunk);
+                line.setAlignment(Pos.CENTER);
+                line.setMaxWidth(Double.MAX_VALUE);
+                line.setStyle("-fx-font-size: 16pt; -fx-font-weight: bold;");
+                transcriptBox.getChildren().add(line);
+                lines.addLast(line);
+            }
+            while (lines.size() > 3) {
                 Label old = lines.removeFirst();
                 transcriptBox.getChildren().remove(old);
             }
