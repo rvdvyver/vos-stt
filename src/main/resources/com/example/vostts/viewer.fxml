@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.vostts.TranscriptViewerController">
+    <top>
+        <VBox spacing="4" alignment="CENTER">
+            <Label fx:id="nameLabel" styleClass="title" />
+            <Label fx:id="dateLabel" />
+        </VBox>
+    </top>
+    <center>
+        <TextArea fx:id="textArea" editable="false" wrapText="true" />
+    </center>
+    <bottom>
+        <HBox alignment="CENTER_RIGHT" styleClass="bottom-bar">
+            <Button text="Close" onAction="#onClose" />
+        </HBox>
+    </bottom>
+</BorderPane>

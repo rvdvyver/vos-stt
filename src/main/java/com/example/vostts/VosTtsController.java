@@ -7,6 +7,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.stage.Modality;
 
 import org.vosk.Model;
 import org.vosk.Recognizer;
@@ -36,6 +39,8 @@ public class VosTtsController {
     @FXML private Button pauseButton;
     @FXML private VBox transcriptBox;
     @FXML private ComboBox<Mixer.Info> deviceCombo;
+    
+    private Stage browserStage;
 
     private final Deque<Label> lines = new ArrayDeque<>();
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -69,6 +74,28 @@ public class VosTtsController {
         running = !running;
         LOG.fine(() -> "Paused state: " + !running);
         pauseButton.setText(running ? "Pause" : "Resume");
+    }
+
+    @FXML
+    private void onBrowse() {
+        if (browserStage != null && browserStage.isShowing()) {
+            browserStage.requestFocus();
+            return;
+        }
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/vostts/browser.fxml"));
+            Parent root = loader.load();
+            browserStage = new Stage();
+            browserStage.initModality(Modality.NONE);
+            browserStage.setTitle("Transcription Browser");
+            Scene scene = new Scene(root, 600, 450);
+            scene.getStylesheets().add(getClass().getResource("/com/example/vostts/dark.css").toExternalForm());
+            browserStage.setScene(scene);
+            browserStage.show();
+        } catch (IOException e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to open browser: " + e.getMessage(), ButtonType.OK);
+            alert.showAndWait();
+        }
     }
 
     private void startTranscription() {
