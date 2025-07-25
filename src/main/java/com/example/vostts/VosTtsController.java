@@ -6,6 +6,10 @@ import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
+import javafx.animation.FadeTransition;
+import javafx.animation.Timeline;
+import javafx.animation.KeyFrame;
+import javafx.util.Duration;
 import javafx.geometry.Pos;
 import javafx.stage.Stage;
 import javafx.fxml.FXMLLoader;
@@ -35,8 +39,10 @@ import java.util.logging.Logger;
 
 public class VosTtsController {
     private static final Logger LOG = Logger.getLogger(VosTtsController.class.getName());
-    @FXML private Label sessionLabel;
+    @FXML private Label sessionLabel; // may be null in new UI
     @FXML private Button startButton;
+    @FXML private Button pauseButton;
+    @FXML private Label timerLabel;
     @FXML private Label partialLabel;
     @FXML private VBox transcriptBox;
     @FXML private ComboBox<Mixer.Info> deviceCombo;
@@ -51,12 +57,21 @@ public class VosTtsController {
     private File modelDir;
     private boolean modelReady = false;
     private String currentSessionId = "-";
+    private boolean paused = false;
+    private Timeline timer;
+    private long startTime;
+    private long pauseAccum;
+    private long pauseStarted;
+    private boolean darkMode = true;
 
     @FXML
     private void initialize() {
         updateSession("-");
         loadInputDevices();
         startButton.setDisable(true);
+        if (timerLabel != null) {
+            timerLabel.setText("00:00:00");
+        }
         if (partialLabel != null) {
             partialLabel.setText("");
             partialLabel.setWrapText(true);
@@ -99,6 +114,58 @@ public class VosTtsController {
         }
     }
 
+    @FXML
+    private void onSettings() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION, "Settings not implemented in demo.", ButtonType.OK);
+        alert.showAndWait();
+    }
+
+    @FXML
+    private void onToggleTheme() {
+        Scene scene = startButton.getScene();
+        if (scene == null) return;
+        String dark = getClass().getResource("/com/example/vostts/dark.css").toExternalForm();
+        String light = getClass().getResource("/com/example/vostts/light.css").toExternalForm();
+        if (darkMode) {
+            scene.getStylesheets().remove(dark);
+            scene.getStylesheets().add(light);
+        } else {
+            scene.getStylesheets().remove(light);
+            scene.getStylesheets().add(dark);
+        }
+        darkMode = !darkMode;
+    }
+
+    @FXML
+    private void onPauseResume() {
+        if (transcriptionTask == null) return;
+        if (paused) {
+            pauseAccum += System.currentTimeMillis() - pauseStarted;
+            paused = false;
+            running = true;
+            if (timer != null) timer.play();
+            pauseButton.setText("Paused");
+        } else {
+            paused = true;
+            running = false;
+            pauseStarted = System.currentTimeMillis();
+            if (timer != null) timer.pause();
+            pauseButton.setText("Resume");
+        }
+    }
+
+    @FXML
+    private void onSave() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION, "Transcript automatically saved to session folder.", ButtonType.OK);
+        alert.showAndWait();
+    }
+
+    @FXML
+    private void onAutoStop() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION, "Auto stop configuration not implemented.", ButtonType.OK);
+        alert.showAndWait();
+    }
+
     private void startTranscription() {
         if (!modelReady) {
             LOG.warning("Attempted to start transcription before model ready");
@@ -106,8 +173,20 @@ public class VosTtsController {
         }
         updateSession(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")));
         startButton.setText("Stop");
-        deviceCombo.setDisable(true);
+        pauseButton.setText("Paused");
+        if (deviceCombo != null) {
+            deviceCombo.setDisable(true);
+        }
         running = true;
+        paused = false;
+        pauseAccum = 0;
+        startTime = System.currentTimeMillis();
+        if (timerLabel != null) {
+            timerLabel.setText("00:00:00");
+            timer = new Timeline(new KeyFrame(Duration.seconds(1), e -> updateTimer()));
+            timer.setCycleCount(Timeline.INDEFINITE);
+            timer.play();
+        }
         if (partialLabel != null) {
             partialLabel.setText("");
         }
@@ -125,8 +204,19 @@ public class VosTtsController {
         // Clearing the reference here avoids further writes until a new session
         // starts but prevents closing the stream while it may still be in use.
         writer = null;
-        startButton.setText("Start Live Transcription");
-        deviceCombo.setDisable(false);
+        startButton.setText("Start");
+        if (pauseButton != null) {
+            pauseButton.setText("Paused");
+        }
+        if (timer != null) {
+            timer.stop();
+        }
+        if (timerLabel != null) {
+            timerLabel.setText("00:00:00");
+        }
+        if (deviceCombo != null) {
+            deviceCombo.setDisable(false);
+        }
         if (partialLabel != null) {
             partialLabel.setText("");
         }
@@ -134,7 +224,9 @@ public class VosTtsController {
 
     private void updateSession(String id) {
         currentSessionId = id;
-        sessionLabel.setText("Session: " + id);
+        if (sessionLabel != null) {
+            sessionLabel.setText("Session: " + id);
+        }
         LOG.fine(() -> "Session updated: " + id);
     }
 
@@ -149,7 +241,10 @@ public class VosTtsController {
             Recognizer recognizer = new Recognizer(model, 16000.0f);
             AudioFormat format = new AudioFormat(16000.0f, 16, 1, true, false);
             DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
-            Mixer.Info selected = deviceCombo.getSelectionModel().getSelectedItem();
+            Mixer.Info selected = null;
+            if (deviceCombo != null) {
+                selected = deviceCombo.getSelectionModel().getSelectedItem();
+            }
             TargetDataLine line;
             if (selected != null) {
                 Mixer mixer = AudioSystem.getMixer(selected);
@@ -181,8 +276,13 @@ public class VosTtsController {
         } finally {
             Platform.runLater(() -> {
                 running = false;
-                startButton.setText("Start Live Transcription");
-                deviceCombo.setDisable(false);
+                startButton.setText("Start");
+                if (pauseButton != null) {
+                    pauseButton.setText("Paused");
+                }
+                if (deviceCombo != null) {
+                    deviceCombo.setDisable(false);
+                }
             });
             // Ensure the writer reference is cleared after the session ends.
             writer = null;
@@ -211,18 +311,41 @@ public class VosTtsController {
         }
     }
 
+    private void updateTimer() {
+        if (timerLabel == null) return;
+        long now = System.currentTimeMillis();
+        long elapsed = now - startTime - pauseAccum - (paused ? (now - pauseStarted) : 0);
+        long secs = elapsed / 1000;
+        long h = secs / 3600;
+        long m = (secs % 3600) / 60;
+        long s = secs % 60;
+        timerLabel.setText(String.format("%02d:%02d:%02d", h, m, s));
+    }
+
     private void writeLine(String text) {
         Platform.runLater(() -> {
             Label line = new Label(text);
             line.setWrapText(true);
             line.setAlignment(Pos.CENTER);
             line.setMaxWidth(Double.MAX_VALUE);
-            line.setStyle("-fx-font-size: 16pt; -fx-font-weight: bold;");
+            line.getStyleClass().add("transcript-new");
             transcriptBox.getChildren().add(line);
+            FadeTransition ft = new FadeTransition(Duration.millis(300), line);
+            ft.setFromValue(0);
+            ft.setToValue(1);
+            ft.play();
             lines.addLast(line);
             while (lines.size() > 3) {
                 Label old = lines.removeFirst();
                 transcriptBox.getChildren().remove(old);
+            }
+            Label[] arr = lines.toArray(new Label[0]);
+            for (int i = 0; i < arr.length; i++) {
+                if (i == arr.length - 1) {
+                    arr[i].getStyleClass().setAll("transcript-new");
+                } else {
+                    arr[i].getStyleClass().setAll("transcript-old");
+                }
             }
         });
         if (writer != null) {
@@ -237,6 +360,9 @@ public class VosTtsController {
     }
 
     private void loadInputDevices() {
+        if (deviceCombo == null) {
+            return;
+        }
         deviceCombo.getItems().clear();
         AudioFormat format = new AudioFormat(16000.0f, 16, 1, true, false);
         DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);

@@ -1,17 +1,55 @@
-.root {
-    -fx-base: white;
+.root-pane {
+    -fx-background-color: white;
+    -fx-padding: 20;
+    -fx-background-radius: 10;
+    -fx-font-family: "Inter", "Roboto", "SF Pro", sans-serif;
     -fx-text-fill: black;
 }
-.title {
-    -fx-font-size: 20pt;
-    -fx-font-weight: bold;
-}
-.bottom-bar {
-    -fx-padding: 4 8 4 8;
-    -fx-background-color: linear-gradient(to top, #e0e0e0, #f8f8f8);
+
+.top-bar {
+    -fx-background-color: white;
+    -fx-padding: 12;
 }
 
-.partial {
-    -fx-font-size: 16pt;
+.bottom-bar {
+    -fx-background-color: #e0e0e0;
+    -fx-padding: 8 16 8 16;
+}
+
+.title {
+    -fx-font-size: 18pt;
     -fx-font-weight: bold;
+}
+
+.icon-button {
+    -fx-background-color: transparent;
+}
+
+.icon-button:hover {
+    -fx-background-color: #dddddd;
+}
+
+.control-button {
+    -fx-background-color: transparent;
+}
+
+.control-button:hover {
+    -fx-background-color: #dddddd;
+}
+
+.timer {
+    -fx-font-weight: bold;
+    -fx-text-fill: #444444;
+    -fx-font-size: 14pt;
+}
+
+.transcript-new {
+    -fx-text-fill: black;
+    -fx-font-size: 26pt;
+    -fx-font-weight: bold;
+}
+
+.transcript-old {
+    -fx-text-fill: #666666;
+    -fx-font-size: 20pt;
 }

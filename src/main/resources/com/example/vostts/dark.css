@@ -1,34 +1,59 @@
-.root {
-    -fx-base: #1E1E1E;
-    -fx-background: #1E1E1E;
+.root-pane {
+    -fx-background-color: #1E1E1E;
+    -fx-padding: 20;
+    -fx-background-radius: 10;
+    -fx-font-family: "Inter", "Roboto", "SF Pro", sans-serif;
     -fx-text-fill: #EEEEEE;
 }
 
-.button {
-    -fx-background-color: #333333;
-    -fx-text-fill: #EEEEEE;
-}
-
-.button:hover {
-    -fx-background-color: #555555;
-}
-
-.title {
-    -fx-font-size: 20pt;
-    -fx-font-weight: bold;
+.top-bar {
+    -fx-background-color: #1E1E1E;
+    -fx-padding: 12;
 }
 
 .bottom-bar {
-    -fx-padding: 4 8 4 8;
     -fx-background-color: #333333;
+    -fx-padding: 8 16 8 16;
 }
 
-.table-view {
-    -fx-control-inner-background: #1E1E1E;
+.title {
+    -fx-font-size: 18pt;
+    -fx-font-weight: bold;
     -fx-text-fill: #EEEEEE;
 }
 
-.partial {
-    -fx-font-size: 16pt;
+.icon-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #EEEEEE;
+}
+
+.icon-button:hover {
+    -fx-background-color: #2A2A2A;
+}
+
+.control-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #EEEEEE;
+    -fx-content-display: top;
+}
+
+.control-button:hover {
+    -fx-background-color: #2A2A2A;
+}
+
+.timer {
+    -fx-text-fill: #CCCCCC;
     -fx-font-weight: bold;
+    -fx-font-size: 14pt;
+}
+
+.transcript-new {
+    -fx-text-fill: #EEEEEE;
+    -fx-font-size: 26pt;
+    -fx-font-weight: bold;
+}
+
+.transcript-old {
+    -fx-text-fill: #888888;
+    -fx-font-size: 20pt;
 }
