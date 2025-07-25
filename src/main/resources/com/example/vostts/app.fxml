@@ -1,24 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.vostts.VosTtsController">
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.vostts.VosTtsController" styleClass="root-pane">
     <top>
-        <VBox spacing="4" alignment="CENTER">
-            <Label fx:id="titleLabel" text="vos-tts" styleClass="title"/>
-            <Label fx:id="sessionLabel" text="Session: -"/>
-        </VBox>
+        <BorderPane styleClass="top-bar">
+            <center>
+                <Label fx:id="titleLabel" text="vos-stt" styleClass="title" />
+            </center>
+            <right>
+                <HBox spacing="8" alignment="CENTER_RIGHT">
+                    <Button text="📁" onAction="#onBrowse" styleClass="icon-button" />
+                    <Button text="⚙" onAction="#onSettings" styleClass="icon-button" />
+                    <Button text="🌗" onAction="#onToggleTheme" styleClass="icon-button" />
+                </HBox>
+            </right>
+        </BorderPane>
     </top>
     <center>
-        <VBox spacing="8" alignment="CENTER">
-            <Button fx:id="startButton" text="Start Live Transcription" maxWidth="Infinity" onAction="#onStart" />
-            <Label fx:id="partialLabel" text="" styleClass="partial" alignment="CENTER" />
-            <VBox fx:id="transcriptBox" prefHeight="200" spacing="2" alignment="CENTER" />
+        <VBox spacing="12" alignment="CENTER">
+            <VBox fx:id="transcriptBox" prefHeight="200" spacing="4" alignment="CENTER" />
+            <Label fx:id="timerLabel" text="00:00:00" styleClass="timer" />
         </VBox>
     </center>
     <bottom>
-        <HBox spacing="8" alignment="CENTER_LEFT" styleClass="bottom-bar">
-            <ComboBox fx:id="deviceCombo" promptText="Audio Input" />
-            <Button text="🗂 Browse Sessions" onAction="#onBrowse" />
+        <HBox spacing="16" alignment="CENTER" styleClass="bottom-bar">
+            <Button fx:id="startButton" text="Start" onAction="#onStart" styleClass="control-button" />
+            <Button fx:id="pauseButton" text="Paused" onAction="#onPauseResume" styleClass="control-button" />
+            <Button text="Save" onAction="#onSave" styleClass="control-button" />
+            <Button text="Timeout" onAction="#onAutoStop" styleClass="control-button" />
         </HBox>
     </bottom>
 </BorderPane>
