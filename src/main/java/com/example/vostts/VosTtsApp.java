@@ -10,9 +10,14 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.VBox;
 import javafx.concurrent.Task;
 
+import com.example.logging.LoggingConfig;
+
+import java.util.logging.Logger;
+
 import java.io.File;
 
 public class VosTtsApp extends Application {
+    private static final Logger LOG = Logger.getLogger(VosTtsApp.class.getName());
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -22,8 +27,10 @@ public class VosTtsApp extends Application {
 
         File modelDir = new File("models/vosk-model-en-us-0.22");
         controller.setModelDir(modelDir);
+        LOG.fine(() -> "Using model directory: " + modelDir.getAbsolutePath());
 
         if (VosTtsController.isModelValid(modelDir)) {
+            LOG.info("Speech model found");
             controller.setModelReady(true);
             Scene scene = new Scene(root, 400, 300);
             scene.getStylesheets().add(getClass().getResource("/com/example/vostts/light.css").toExternalForm());
@@ -31,6 +38,7 @@ public class VosTtsApp extends Application {
             stage.setScene(scene);
             stage.show();
         } else {
+            LOG.info("Speech model not present, downloading...");
             ProgressBar bar = new ProgressBar(0);
             Label label = new Label("Downloading speech model...\nThis may take a few minutes.");
             VBox box = new VBox(10, label, bar);
@@ -44,6 +52,7 @@ public class VosTtsApp extends Application {
             bar.progressProperty().bind(task.progressProperty());
             task.setOnSucceeded(e -> {
                 controller.setModelReady(true);
+                LOG.info("Speech model ready");
                 Scene scene = new Scene(root, 400, 300);
                 scene.getStylesheets().add(getClass().getResource("/com/example/vostts/light.css").toExternalForm());
                 stage.setScene(scene);
@@ -53,6 +62,8 @@ public class VosTtsApp extends Application {
     }
 
     public static void main(String[] args) {
+        LoggingConfig.configure();
+        LOG.info("Launching application");
         launch(args);
     }
 }
