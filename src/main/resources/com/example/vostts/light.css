@@ -10,3 +10,8 @@
     -fx-padding: 4 8 4 8;
     -fx-background-color: linear-gradient(to top, #e0e0e0, #f8f8f8);
 }
+
+.partial {
+    -fx-font-size: 16pt;
+    -fx-font-weight: bold;
+}

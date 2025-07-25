@@ -37,6 +37,7 @@ public class VosTtsController {
     @FXML private Label sessionLabel;
     @FXML private Button startButton;
     @FXML private Button pauseButton;
+    @FXML private Label partialLabel;
     @FXML private VBox transcriptBox;
     @FXML private ComboBox<Mixer.Info> deviceCombo;
     
@@ -55,6 +56,9 @@ public class VosTtsController {
         updateSession("-");
         loadInputDevices();
         startButton.setDisable(true);
+        if (partialLabel != null) {
+            partialLabel.setText("");
+        }
         LOG.fine("Controller initialised");
     }
 
@@ -107,6 +111,9 @@ public class VosTtsController {
         startButton.setText("Stop");
         pauseButton.setDisable(false);
         running = true;
+        if (partialLabel != null) {
+            partialLabel.setText("");
+        }
         LOG.info("Transcription started");
         transcriptionTask = executor.submit(this::runRecognition);
     }
@@ -123,6 +130,9 @@ public class VosTtsController {
         writer = null;
         startButton.setText("Start Live Transcription");
         pauseButton.setDisable(true);
+        if (partialLabel != null) {
+            partialLabel.setText("");
+        }
     }
 
     private void updateSession(String id) {
@@ -158,6 +168,9 @@ public class VosTtsController {
                     if (recognizer.acceptWaveForm(buffer, n)) {
                         String result = recognizer.getResult();
                         handleResult(result);
+                    } else {
+                        String partial = recognizer.getPartialResult();
+                        handlePartial(partial);
                     }
                 }
             }
@@ -183,6 +196,18 @@ public class VosTtsController {
         if (!text.isEmpty()) {
             LOG.fine(() -> "Recognised: " + text);
             writeLine(text);
+            if (partialLabel != null) {
+                Platform.runLater(() -> partialLabel.setText(text));
+            }
+        }
+    }
+
+    private void handlePartial(String json) {
+        if (partialLabel == null) return;
+        JSONObject obj = new JSONObject(json);
+        String partial = obj.optString("partial");
+        if (!partial.isEmpty()) {
+            Platform.runLater(() -> partialLabel.setText(partial));
         }
     }
 

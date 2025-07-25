@@ -11,6 +11,7 @@
     <center>
         <VBox spacing="8" alignment="CENTER">
             <Button fx:id="startButton" text="Start Live Transcription" maxWidth="Infinity" onAction="#onStart" />
+            <Label fx:id="partialLabel" text="" styleClass="partial" />
             <VBox fx:id="transcriptBox" prefHeight="200" spacing="2" />
         </VBox>
     </center>
