@@ -117,13 +117,10 @@ public class VosTtsController {
         if (transcriptionTask != null) {
             transcriptionTask.cancel(true);
         }
-        try {
-            if (writer != null) {
-                writer.close();
-            }
-        } catch (IOException e) {
-            LOG.log(Level.WARNING, "Error closing output", e);
-        }
+        // Writer is closed in the recognition thread's try-with-resources block.
+        // Clearing the reference here avoids further writes until a new session
+        // starts but prevents closing the stream while it may still be in use.
+        writer = null;
         startButton.setText("Start Live Transcription");
         pauseButton.setDisable(true);
     }
@@ -174,6 +171,8 @@ public class VosTtsController {
                 startButton.setText("Start Live Transcription");
                 pauseButton.setDisable(true);
             });
+            // Ensure the writer reference is cleared after the session ends.
+            writer = null;
             LOG.fine("Recognition loop finished");
         }
     }
