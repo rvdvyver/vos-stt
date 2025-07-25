@@ -14,6 +14,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.Parent;
 
+import com.example.vostts.ThemeManager;
+import com.example.vostts.DragUtil;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -82,7 +85,8 @@ public class TranscriptionBrowserController {
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.initStyle(StageStyle.UNDECORATED);
             Scene scene = new Scene(root, 600, 400);
-            scene.getStylesheets().add(getClass().getResource("/com/example/vostts/dark.css").toExternalForm());
+            ThemeManager.apply(scene);
+            DragUtil.makeDraggable(stage, root);
             stage.setScene(scene);
             stage.showAndWait();
         } catch (IOException e) {

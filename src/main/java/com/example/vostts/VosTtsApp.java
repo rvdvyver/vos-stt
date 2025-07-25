@@ -11,6 +11,10 @@ import javafx.stage.StageStyle;
 import javafx.scene.layout.VBox;
 import javafx.concurrent.Task;
 
+// Application utilities
+import com.example.vostts.ThemeManager;
+import com.example.vostts.DragUtil;
+
 import com.example.logging.LoggingConfig;
 
 import java.util.logging.Logger;
@@ -36,7 +40,8 @@ public class VosTtsApp extends Application {
             LOG.info("Speech model found");
             controller.setModelReady(true);
             Scene scene = new Scene(root, 400, 300);
-            scene.getStylesheets().add(getClass().getResource("/com/example/vostts/dark.css").toExternalForm());
+            ThemeManager.apply(scene);
+            DragUtil.makeDraggable(stage, root);
             stage.setScene(scene);
             stage.show();
         } else {
@@ -47,10 +52,12 @@ public class VosTtsApp extends Application {
             VBox box = new VBox(10, label, bar, speedLabel);
             box.setStyle("-fx-padding: 20; -fx-alignment: center;");
             Scene splashScene = new Scene(box, 400, 170);
+            ThemeManager.apply(splashScene);
 
             Stage splashStage = new Stage(StageStyle.UNDECORATED);
             splashStage.setTitle("Preparing Model");
             splashStage.setScene(splashScene);
+            DragUtil.makeDraggable(splashStage, box);
             splashStage.show();
 
             Task<Void> task = controller.createModelDownloadTask(modelDir);
@@ -61,7 +68,8 @@ public class VosTtsApp extends Application {
                 controller.setModelReady(true);
                 LOG.info("Speech model ready");
                 Scene scene = new Scene(root, 400, 300);
-                scene.getStylesheets().add(getClass().getResource("/com/example/vostts/dark.css").toExternalForm());
+                ThemeManager.apply(scene);
+                DragUtil.makeDraggable(stage, root);
                 splashStage.close();
                 stage.setScene(scene);
                 stage.show();

@@ -22,6 +22,8 @@ import org.vosk.Recognizer;
 import org.json.JSONObject;
 
 import com.example.vostts.SettingsController;
+import com.example.vostts.ThemeManager;
+import com.example.vostts.DragUtil;
 
 import javax.sound.sampled.*;
 import java.io.*;
@@ -69,7 +71,6 @@ public class VosTtsController {
     private long startTime;
     private long pauseAccum;
     private long pauseStarted;
-    private boolean darkMode = true;
     /** Maximum characters before inserting a line break. */
     private int wrapChars = 35;
 
@@ -113,7 +114,8 @@ public class VosTtsController {
             browserStage.initModality(Modality.NONE);
             browserStage.initStyle(StageStyle.UNDECORATED);
             Scene scene = new Scene(root, 600, 450);
-            scene.getStylesheets().add(getClass().getResource("/com/example/vostts/dark.css").toExternalForm());
+            ThemeManager.apply(scene);
+            DragUtil.makeDraggable(browserStage, root);
             browserStage.setScene(scene);
             browserStage.show();
         } catch (IOException e) {
@@ -133,7 +135,8 @@ public class VosTtsController {
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.initStyle(StageStyle.UNDECORATED);
             Scene scene = new Scene(root, 300, 200);
-            scene.getStylesheets().add(getClass().getResource("/com/example/vostts/dark.css").toExternalForm());
+            ThemeManager.apply(scene);
+            DragUtil.makeDraggable(stage, root);
             stage.setScene(scene);
             stage.showAndWait();
         } catch (IOException e) {
@@ -152,18 +155,11 @@ public class VosTtsController {
 
     @FXML
     private void onToggleTheme() {
-        Scene scene = startButton.getScene();
-        if (scene == null) return;
-        String dark = getClass().getResource("/com/example/vostts/dark.css").toExternalForm();
-        String light = getClass().getResource("/com/example/vostts/light.css").toExternalForm();
-        if (darkMode) {
-            scene.getStylesheets().remove(dark);
-            scene.getStylesheets().add(light);
-        } else {
-            scene.getStylesheets().remove(light);
-            scene.getStylesheets().add(dark);
+        ThemeManager.toggle();
+        ThemeManager.apply(startButton.getScene());
+        if (browserStage != null && browserStage.isShowing()) {
+            ThemeManager.apply(browserStage.getScene());
         }
-        darkMode = !darkMode;
     }
 
     @FXML
