@@ -33,7 +33,7 @@ public class VosTtsApp extends Application {
             LOG.info("Speech model found");
             controller.setModelReady(true);
             Scene scene = new Scene(root, 400, 300);
-            scene.getStylesheets().add(getClass().getResource("/com/example/vostts/light.css").toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/com/example/vostts/dark.css").toExternalForm());
             stage.setTitle("vos-tts");
             stage.setScene(scene);
             stage.show();
@@ -54,7 +54,7 @@ public class VosTtsApp extends Application {
                 controller.setModelReady(true);
                 LOG.info("Speech model ready");
                 Scene scene = new Scene(root, 400, 300);
-                scene.getStylesheets().add(getClass().getResource("/com/example/vostts/light.css").toExternalForm());
+                scene.getStylesheets().add(getClass().getResource("/com/example/vostts/dark.css").toExternalForm());
                 stage.setScene(scene);
             });
             new Thread(task).start();

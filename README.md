@@ -16,3 +16,6 @@ mvn compile exec:java
 Click **Start Live Transcription** to begin a session. Lines of text will
 appear in large font as the mock recogniser generates them. A file named after
 the session timestamp is written to disk.
+
+Use **🗂 Browse Sessions** to open the new Transcription Browser. From there you
+can open previous transcripts in a modal viewer or remove old sessions.

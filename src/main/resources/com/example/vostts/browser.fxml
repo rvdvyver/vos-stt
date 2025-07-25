@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.vostts.TranscriptionBrowserController">
+    <top>
+        <Label text="Transcription Browser" styleClass="title" BorderPane.alignment="CENTER" />
+    </top>
+    <center>
+        <TableView fx:id="table" prefHeight="400">
+            <columns>
+                <TableColumn fx:id="nameColumn" text="Name" prefWidth="200" />
+                <TableColumn fx:id="dateColumn" text="Date" prefWidth="180" />
+                <TableColumn fx:id="durationColumn" text="Duration" prefWidth="120" />
+                <TableColumn fx:id="statusColumn" text="Status" prefWidth="120" />
+            </columns>
+        </TableView>
+    </center>
+    <bottom>
+        <HBox spacing="8" alignment="CENTER_RIGHT" styleClass="bottom-bar">
+            <Button text="Open" onAction="#onOpen" />
+            <Button text="Delete" onAction="#onDelete" />
+            <Button text="Export" onAction="#onExport" />
+            <Button text="Refresh" onAction="#onRefresh" />
+        </HBox>
+    </bottom>
+</BorderPane>

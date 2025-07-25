@@ -18,6 +18,7 @@
         <HBox spacing="8" alignment="CENTER_LEFT" styleClass="bottom-bar">
             <Button fx:id="pauseButton" text="Pause" disable="true" onAction="#onPause" />
             <ComboBox fx:id="deviceCombo" promptText="Audio Input" />
+            <Button text="🗂 Browse Sessions" onAction="#onBrowse" />
         </HBox>
     </bottom>
 </BorderPane>
