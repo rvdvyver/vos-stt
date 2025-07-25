@@ -59,6 +59,7 @@ public class VosTtsController {
         startButton.setDisable(true);
         if (partialLabel != null) {
             partialLabel.setText("");
+            partialLabel.setWrapText(true);
             partialLabel.setAlignment(Pos.CENTER);
             partialLabel.setMaxWidth(Double.MAX_VALUE);
         }
@@ -210,19 +211,15 @@ public class VosTtsController {
         }
     }
 
-    private static final int LINE_LENGTH = 40;
-
     private void writeLine(String text) {
         Platform.runLater(() -> {
-            for (int i = 0; i < text.length(); i += LINE_LENGTH) {
-                String chunk = text.substring(i, Math.min(i + LINE_LENGTH, text.length()));
-                Label line = new Label(chunk);
-                line.setAlignment(Pos.CENTER);
-                line.setMaxWidth(Double.MAX_VALUE);
-                line.setStyle("-fx-font-size: 16pt; -fx-font-weight: bold;");
-                transcriptBox.getChildren().add(line);
-                lines.addLast(line);
-            }
+            Label line = new Label(text);
+            line.setWrapText(true);
+            line.setAlignment(Pos.CENTER);
+            line.setMaxWidth(Double.MAX_VALUE);
+            line.setStyle("-fx-font-size: 16pt; -fx-font-weight: bold;");
+            transcriptBox.getChildren().add(line);
+            lines.addLast(line);
             while (lines.size() > 3) {
                 Label old = lines.removeFirst();
                 transcriptBox.getChildren().remove(old);
