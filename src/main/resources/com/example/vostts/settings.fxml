@@ -16,6 +16,6 @@
     </HBox>
     <HBox spacing="8" alignment="CENTER_RIGHT">
         <Button text="Save" onAction="#onSave" />
-        <Button fx:id="closeButton" text="Close" onAction="#onClose" />
+        <Button fx:id="closeButton" text="Close" onAction="#onClose" styleClass="close-button" />
     </HBox>
 </VBox>
