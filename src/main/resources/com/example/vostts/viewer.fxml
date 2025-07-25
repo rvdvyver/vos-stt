@@ -13,7 +13,7 @@
     </center>
     <bottom>
         <HBox alignment="CENTER_RIGHT" styleClass="bottom-bar">
-            <Button text="Close" onAction="#onClose" />
+            <Button fx:id="closeButton" text="Close" onAction="#onClose" />
         </HBox>
     </bottom>
 </BorderPane>
