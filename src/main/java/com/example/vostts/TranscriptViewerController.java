@@ -24,7 +24,7 @@ public class TranscriptViewerController {
         this.session = session;
         nameLabel.setText(session.getName());
         dateLabel.setText(session.getDate());
-        Path file = session.getDirectory().resolve("transcript.txt");
+        Path file = session.getDirectory().resolve("transcript.srt");
         try {
             String content = Files.exists(file) ? Files.readString(file) : "";
             textArea.setText(content);

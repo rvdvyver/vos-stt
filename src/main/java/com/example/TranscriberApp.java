@@ -30,11 +30,14 @@ public class TranscriberApp extends JFrame {
     private final JComboBox<String> modelComboBox = new JComboBox<>();
     private final File modelsBaseDir = new File("models");
     private File currentModelDir;
-    private final File outputFile = new File("transcript.txt");
+    private final File outputFile = new File("transcript.srt");
     private final JButton startStopButton = new JButton("Start");
     private volatile boolean running = false;
     private Thread recognitionThread;
     private boolean modelReady = false;
+    private long sessionStart;
+    private long lastSegment;
+    private int srtIndex;
 
     private static class ModelInfo {
         final String url;
@@ -236,6 +239,9 @@ public class TranscriberApp extends JFrame {
                  FileWriter writer = new FileWriter(outputFile, true)) {
                 LOG.info("Recognition thread started");
                 Recognizer recognizer = new Recognizer(model, 16000.0f);
+                sessionStart = System.currentTimeMillis();
+                lastSegment = 0;
+                srtIndex = 1;
                 AudioFormat format = new AudioFormat(16000.0f, 16, 1, true, false);
                 DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
                 Mixer.Info selected = (Mixer.Info) deviceComboBox.getSelectedItem();
@@ -318,12 +324,28 @@ public class TranscriberApp extends JFrame {
 
     private void appendText(String text, FileWriter writer) throws IOException {
         lastWordsLabel.setText(text);
-        writer.write(text + System.lineSeparator());
+        long end = System.currentTimeMillis() - sessionStart;
+        writer.write(Integer.toString(srtIndex++));
+        writer.write(System.lineSeparator());
+        writer.write(formatSrtTime(lastSegment) + " --> " + formatSrtTime(end));
+        writer.write(System.lineSeparator());
+        writer.write(text);
+        writer.write(System.lineSeparator());
+        writer.write(System.lineSeparator());
         writer.flush();
+        lastSegment = end;
         SwingUtilities.invokeLater(() -> {
             textArea.append(text + System.lineSeparator());
             textArea.setCaretPosition(textArea.getDocument().getLength());
         });
+    }
+
+    private static String formatSrtTime(long ms) {
+        long h = ms / 3_600_000;
+        long m = (ms % 3_600_000) / 60_000;
+        long s = (ms % 60_000) / 1000;
+        long milli = ms % 1000;
+        return String.format("%02d:%02d:%02d,%03d", h, m, s, milli);
     }
 
     public static void main(String[] args) {
