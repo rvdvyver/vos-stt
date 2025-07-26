@@ -71,6 +71,10 @@ public class VosTtsController {
     private long startTime;
     private long pauseAccum;
     private long pauseStarted;
+    /** Timestamp in ms marking the start of the current subtitle segment. */
+    private long lastSegmentTime;
+    /** Subtitle index counter for SRT output. */
+    private int srtIndex;
     /** Maximum characters before inserting a line break. */
     private int wrapChars = 35;
 
@@ -209,6 +213,8 @@ public class VosTtsController {
         paused = false;
         pauseAccum = 0;
         startTime = System.currentTimeMillis();
+        lastSegmentTime = 0;
+        srtIndex = 1;
         if (timerLabel != null) {
             timerLabel.setText("00:00:00");
             timer = new Timeline(new KeyFrame(Duration.seconds(1), e -> updateTimer()));
@@ -270,7 +276,7 @@ public class VosTtsController {
     private void runRecognition() {
         Path base = Paths.get(System.getProperty("user.home"), "vos-stt", "sessions", currentSessionId);
         base.toFile().mkdirs();
-        File outFile = base.resolve("transcript.txt").toFile();
+        File outFile = base.resolve("transcript.srt").toFile();
         LOG.fine(() -> "Writing transcript to " + outFile.getAbsolutePath());
         try (Model model = new Model(locateModelPath(modelDir).getAbsolutePath());
              BufferedWriter bw = new BufferedWriter(new FileWriter(outFile))) {
@@ -356,6 +362,21 @@ public class VosTtsController {
         timerLabel.setText(String.format("%02d:%02d:%02d", h, m, s));
     }
 
+    /** Return elapsed milliseconds since the session started accounting for pauses. */
+    private long getElapsedMillis() {
+        long now = System.currentTimeMillis();
+        return now - startTime - pauseAccum - (paused ? (now - pauseStarted) : 0);
+    }
+
+    /** Format the given milliseconds in SRT timestamp format. */
+    private static String formatSrtTime(long ms) {
+        long h = ms / 3_600_000;
+        long m = (ms % 3_600_000) / 60_000;
+        long s = (ms % 60_000) / 1000;
+        long milli = ms % 1000;
+        return String.format("%02d:%02d:%02d,%03d", h, m, s, milli);
+    }
+
     /**
      * Wrap the provided text so that no line exceeds {@code wrapChars} characters.
      */
@@ -411,9 +432,16 @@ public class VosTtsController {
         });
         if (writer != null) {
             try {
+                long end = getElapsedMillis();
+                writer.write(Integer.toString(srtIndex++));
+                writer.newLine();
+                writer.write(formatSrtTime(lastSegmentTime) + " --> " + formatSrtTime(end));
+                writer.newLine();
                 writer.write(text);
                 writer.newLine();
+                writer.newLine();
                 writer.flush();
+                lastSegmentTime = end;
             } catch (IOException e) {
                 LOG.log(Level.WARNING, "Failed writing line", e);
             }

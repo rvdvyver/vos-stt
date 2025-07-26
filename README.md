@@ -17,8 +17,9 @@ Using the JavaFX plugin avoids warnings about an unsupported configuration when
 running the application.
 
 Click **Start Live Transcription** to begin a session. Lines of text will
-appear in large font as the mock recogniser generates them. A file named after
-the session timestamp is written to disk.
+appear in large font as the mock recogniser generates them. Each session now
+writes a `transcript.srt` subtitle file with timestamps for every recognised
+phrase.
 
 Use **🗂 Browse Sessions** to open the new Transcription Browser. From there you
 can open previous transcripts in a modal viewer or remove old sessions.
