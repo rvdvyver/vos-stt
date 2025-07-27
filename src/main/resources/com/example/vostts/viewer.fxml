@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.vostts.TranscriptViewerController">
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.vostts.TranscriptViewerController" styleClass="root-pane">
     <top>
         <BorderPane styleClass="top-bar">
             <center>
@@ -20,7 +20,7 @@
     </center>
     <bottom>
         <HBox alignment="CENTER_RIGHT" styleClass="bottom-bar">
-            <Button fx:id="closeButton" text="Close" onAction="#onClose" styleClass="close-button" />
+            <Button fx:id="closeButton" text="Close" onAction="#onClose" styleClass="control-button close-button" />
         </HBox>
     </bottom>
 </BorderPane>
