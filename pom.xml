@@ -71,6 +71,15 @@
                     <type>dmg</type>
                     <icon>${project.build.directory}/app-icon.png</icon>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>package-dmg</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jpackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

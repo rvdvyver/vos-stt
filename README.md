@@ -28,3 +28,16 @@ can open previous transcripts in a modal viewer or remove old sessions.
 The settings menu now includes an option to control how many characters are
 displayed on a single transcription line before wrapping occurs. The default is
 35 characters.
+
+## Packaging for macOS
+
+The project includes a Maven configuration using the
+`jpackage-maven-plugin` to build a macOS DMG installer.
+Run the tests first to generate the application icon and then invoke
+the plugin:
+
+```bash
+mvn test package
+```
+
+The resulting `vos-stt.dmg` can be found in the `target` directory.

@@ -18,15 +18,49 @@ public class IconGeneratorTest {
             int size = 256;
             BufferedImage img = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
             Graphics2D g = img.createGraphics();
-            g.setPaint(new GradientPaint(0,0, Color.ORANGE, size, size, Color.BLUE));
-            g.fillRect(0,0,size,size);
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+            // Transparent background
+            g.setComposite(AlphaComposite.Clear);
+            g.fillRect(0, 0, size, size);
+            g.setComposite(AlphaComposite.SrcOver);
+
+            // Fox head
+            Polygon head = new Polygon();
+            head.addPoint(size / 2, size / 3);
+            head.addPoint(size * 3 / 4, size * 3 / 4);
+            head.addPoint(size / 4, size * 3 / 4);
+            g.setColor(new Color(255, 140, 0));
+            g.fillPolygon(head);
+
+            // Left ear
+            Polygon leftEar = new Polygon();
+            leftEar.addPoint(size / 3, size / 3);
+            leftEar.addPoint(size / 4, size / 8);
+            leftEar.addPoint(size / 5, size / 3);
+            g.fillPolygon(leftEar);
+
+            // Right ear
+            Polygon rightEar = new Polygon();
+            rightEar.addPoint(size * 2 / 3, size / 3);
+            rightEar.addPoint(size * 3 / 4, size / 8);
+            rightEar.addPoint(size * 4 / 5, size / 3);
+            g.fillPolygon(rightEar);
+
+            // Eyes
             g.setColor(Color.WHITE);
-            g.setFont(new Font("SansSerif", Font.BOLD, size/2));
-            FontMetrics fm = g.getFontMetrics();
-            String txt = "V";
-            int x = (size - fm.stringWidth(txt)) / 2;
-            int y = (size - fm.getHeight()) / 2 + fm.getAscent();
-            g.drawString(txt, x, y);
+            int eyeSize = size / 12;
+            g.fillOval(size / 2 - eyeSize - eyeSize / 2, size / 2, eyeSize, eyeSize);
+            g.fillOval(size / 2 + eyeSize / 2, size / 2, eyeSize, eyeSize);
+            g.setColor(Color.BLACK);
+            int pupilSize = eyeSize / 2;
+            g.fillOval(size / 2 - eyeSize - pupilSize / 2, size / 2 + pupilSize / 2, pupilSize, pupilSize);
+            g.fillOval(size / 2 + eyeSize / 2 + pupilSize / 2 - pupilSize, size / 2 + pupilSize / 2, pupilSize, pupilSize);
+
+            // Nose
+            int noseSize = eyeSize;
+            g.fillOval(size / 2 - noseSize / 2, size * 3 / 4 - noseSize / 2, noseSize, noseSize);
+
             g.dispose();
             Files.createDirectories(icon.getParent());
             ImageIO.write(img, "png", icon.toFile());
