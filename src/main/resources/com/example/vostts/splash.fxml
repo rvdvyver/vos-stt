@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml" spacing="12" alignment="CENTER" styleClass="splash-box">
+    <Label text="vos-stt" styleClass="title" />
+    <ProgressBar fx:id="bar" prefWidth="260" />
+    <Label fx:id="statusLabel" />
+</VBox>

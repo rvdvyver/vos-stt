@@ -29,6 +29,12 @@
             <artifactId>javafx-fxml</artifactId>
             <version>21</version>
         </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.10.0</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -52,6 +58,24 @@
                 <configuration>
                     <mainClass>com.example.vostts.VosTtsApp</mainClass>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.panteleyev</groupId>
+                <artifactId>jpackage-maven-plugin</artifactId>
+                <version>1.6.6</version>
+                <configuration>
+                    <input>${project.build.directory}</input>
+                    <destination>${project.build.directory}</destination>
+                    <mainClass>com.example.vostts.VosTtsApp</mainClass>
+                    <name>vos-stt</name>
+                    <type>dmg</type>
+                    <icon>${project.build.directory}/app-icon.png</icon>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.1.2</version>
             </plugin>
         </plugins>
     </build>

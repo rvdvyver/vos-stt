@@ -65,3 +65,14 @@
     -fx-text-fill: #888888;
     -fx-font-size: 20pt;
 }
+
+.splash-box {
+    -fx-background-radius: 10;
+    -fx-padding: 30;
+    -fx-alignment: center;
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #ff4081, #7c4dff);
+}
+
+.splash-box .label {
+    -fx-text-fill: #EEEEEE;
+}

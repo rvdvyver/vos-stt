@@ -36,46 +36,52 @@ public class VosTtsApp extends Application {
 
         stage.initStyle(StageStyle.UNDECORATED);
 
+        // Splash screen while loading
+        FXMLLoader splashLoader = new FXMLLoader(getClass().getResource("/com/example/vostts/splash.fxml"));
+        Parent splashRoot = splashLoader.load();
+        ProgressBar bar = (ProgressBar) splashLoader.getNamespace().get("bar");
+        Label statusLabel = (Label) splashLoader.getNamespace().get("statusLabel");
+        Scene splashScene = new Scene(splashRoot, 400, 170);
+        ThemeManager.apply(splashScene);
+        Stage splashStage = new Stage(StageStyle.UNDECORATED);
+        splashStage.setTitle("Preparing Model");
+        splashStage.setScene(splashScene);
+        DragUtil.makeDraggable(splashStage, splashRoot);
+        splashStage.show();
+
+        Task<Void> task;
         if (VosTtsController.isModelValid(modelDir)) {
             LOG.info("Speech model found");
             controller.setModelReady(true);
+            task = new Task<>() {
+                @Override
+                protected Void call() throws Exception {
+                    updateProgress(1,1);
+                    Thread.sleep(2000);
+                    return null;
+                }
+            };
+        } else {
+            LOG.info("Speech model not present, downloading...");
+            statusLabel.setText("Downloading speech model...\nThis may take a few minutes.");
+            task = controller.createModelDownloadTask(modelDir);
+            bar.progressProperty().bind(task.progressProperty());
+            statusLabel.textProperty().bind(task.messageProperty());
+        }
+
+        task.setOnSucceeded(e -> {
+            controller.setModelDir(modelDir);
+            controller.setModelReady(true);
+            LOG.info("Speech model ready");
             Scene scene = new Scene(root, 400, 300);
             ThemeManager.apply(scene);
             DragUtil.makeDraggable(stage, root);
+            splashStage.close();
             stage.setScene(scene);
             stage.show();
-        } else {
-            LOG.info("Speech model not present, downloading...");
-            ProgressBar bar = new ProgressBar(0);
-            Label label = new Label("Downloading speech model...\nThis may take a few minutes.");
-            Label speedLabel = new Label();
-            VBox box = new VBox(10, label, bar, speedLabel);
-            box.setStyle("-fx-padding: 20; -fx-alignment: center;");
-            Scene splashScene = new Scene(box, 400, 170);
-            ThemeManager.apply(splashScene);
+        });
 
-            Stage splashStage = new Stage(StageStyle.UNDECORATED);
-            splashStage.setTitle("Preparing Model");
-            splashStage.setScene(splashScene);
-            DragUtil.makeDraggable(splashStage, box);
-            splashStage.show();
-
-            Task<Void> task = controller.createModelDownloadTask(modelDir);
-            bar.progressProperty().bind(task.progressProperty());
-            speedLabel.textProperty().bind(task.messageProperty());
-            task.setOnSucceeded(e -> {
-                controller.setModelDir(modelDir);
-                controller.setModelReady(true);
-                LOG.info("Speech model ready");
-                Scene scene = new Scene(root, 400, 300);
-                ThemeManager.apply(scene);
-                DragUtil.makeDraggable(stage, root);
-                splashStage.close();
-                stage.setScene(scene);
-                stage.show();
-            });
-            new Thread(task).start();
-        }
+        new Thread(task).start();
     }
 
     public static void main(String[] args) {
