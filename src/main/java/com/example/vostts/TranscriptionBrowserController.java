@@ -111,12 +111,6 @@ public class TranscriptionBrowserController {
     }
 
     @FXML
-    private void onExport() {
-        // Placeholder: real export not implemented
-        showError("Export not implemented in demo.");
-    }
-
-    @FXML
     private void onClose() {
         Stage stage = (Stage) table.getScene().getWindow();
         stage.close();

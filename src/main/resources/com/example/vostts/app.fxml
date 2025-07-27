@@ -4,13 +4,9 @@
 <BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.vostts.VosTtsController" styleClass="root-pane">
     <top>
         <BorderPane styleClass="top-bar">
-            <center>
-                <Label fx:id="titleLabel" text="vos-stt" styleClass="title" />
-            </center>
             <right>
                 <HBox spacing="8" alignment="CENTER_RIGHT">
                     <Button text="📁" onAction="#onBrowse" styleClass="icon-button" />
-                    <Button text="🗒" onAction="#onMonitor" styleClass="icon-button" />
                     <Button fx:id="settingsButton" text="⚙" onAction="#onSettings" styleClass="icon-button" />
                     <Button text="🌗" onAction="#onToggleTheme" styleClass="icon-button" />
                     <Button text="✕" onAction="#onCloseApp" styleClass="icon-button close-button" />
