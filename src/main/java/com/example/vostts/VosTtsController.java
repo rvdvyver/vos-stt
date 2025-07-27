@@ -71,6 +71,8 @@ public class VosTtsController {
     private long startTime;
     private long pauseAccum;
     private long pauseStarted;
+    /** Microphone line currently in use by the recognition thread. */
+    private volatile TargetDataLine activeLine;
     /** Timestamp in ms marking the start of the current subtitle segment. */
     private long lastSegmentTime;
     /** Subtitle index counter for SRT output. */
@@ -202,6 +204,19 @@ public class VosTtsController {
             LOG.warning("Attempted to start transcription before model ready");
             return;
         }
+        // Ensure any previously open line is released before starting again
+        TargetDataLine line = activeLine;
+        if (line != null) {
+            try {
+                line.flush();
+                line.stop();
+            } catch (Exception ex) {
+                LOG.log(Level.FINE, "Error releasing line", ex);
+            } finally {
+                line.close();
+                activeLine = null;
+            }
+        }
         updateSession(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")));
         startButton.setText("Stop");
         if (pauseButton != null) {
@@ -240,10 +255,30 @@ public class VosTtsController {
         if (transcriptionTask != null) {
             transcriptionTask.cancel(true);
         }
+        BufferedWriter w = writer;
+        if (w != null) {
+            try {
+                w.flush();
+            } catch (IOException e) {
+                LOG.log(Level.FINE, "Failed flushing writer", e);
+            }
+        }
         // Writer is closed in the recognition thread's try-with-resources block.
         // Clearing the reference here avoids further writes until a new session
         // starts but prevents closing the stream while it may still be in use.
         writer = null;
+        TargetDataLine line = activeLine;
+        if (line != null) {
+            try {
+                line.flush();
+                line.stop();
+            } catch (Exception ex) {
+                LOG.log(Level.FINE, "Error stopping line", ex);
+            } finally {
+                line.close();
+                activeLine = null;
+            }
+        }
         startButton.setText("Start");
         if (pauseButton != null) {
             pauseButton.setText("Paused");
@@ -294,6 +329,7 @@ public class VosTtsController {
             }
             line.open(format);
             line.start();
+            activeLine = line;
             byte[] buffer = new byte[4096];
             LOG.fine("Recognition loop started");
             while (!Thread.currentThread().isInterrupted()) {
@@ -334,6 +370,18 @@ public class VosTtsController {
             }
             // Ensure the writer reference is cleared after the session ends.
             writer = null;
+            TargetDataLine line = activeLine;
+            if (line != null) {
+                try {
+                    line.flush();
+                    line.stop();
+                } catch (Exception ex) {
+                    LOG.log(Level.FINE, "Error stopping line", ex);
+                } finally {
+                    line.close();
+                    activeLine = null;
+                }
+            }
             LOG.fine("Recognition loop finished");
         }
     }
