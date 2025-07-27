@@ -17,8 +17,6 @@
             <columns>
                 <TableColumn fx:id="nameColumn" text="Name" prefWidth="200" />
                 <TableColumn fx:id="dateColumn" text="Date" prefWidth="180" />
-                <TableColumn fx:id="durationColumn" text="Duration" prefWidth="120" />
-                <TableColumn fx:id="statusColumn" text="Status" prefWidth="120" />
             </columns>
         </TableView>
     </center>

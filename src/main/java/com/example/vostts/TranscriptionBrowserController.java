@@ -29,8 +29,6 @@ public class TranscriptionBrowserController {
     @FXML private TableView<SessionMetadata> table;
     @FXML private TableColumn<SessionMetadata, String> nameColumn;
     @FXML private TableColumn<SessionMetadata, String> dateColumn;
-    @FXML private TableColumn<SessionMetadata, String> durationColumn;
-    @FXML private TableColumn<SessionMetadata, String> statusColumn;
 
     private final ObservableList<SessionMetadata> sessions = FXCollections.observableArrayList();
 
@@ -38,8 +36,6 @@ public class TranscriptionBrowserController {
     private void initialize() {
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         dateColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
-        durationColumn.setCellValueFactory(new PropertyValueFactory<>("duration"));
-        statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
         table.setItems(sessions);
         refresh();
     }
