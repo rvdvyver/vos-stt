@@ -26,7 +26,6 @@
         <HBox spacing="8" alignment="CENTER_RIGHT" styleClass="bottom-bar">
             <Button text="Open" onAction="#onOpen" />
             <Button text="Delete" onAction="#onDelete" />
-            <Button text="Export" onAction="#onExport" />
             <Button text="Refresh" onAction="#onRefresh" />
         </HBox>
     </bottom>

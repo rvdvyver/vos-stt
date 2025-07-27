@@ -25,9 +25,6 @@ your home directory with timestamps for every recognised phrase.
 Use **🗂 Browse Sessions** to open the new Transcription Browser. From there you
 can open previous transcripts in a modal viewer or remove old sessions.
 
-Use **🗒 Processed Files** to open the monitor page showing which transcript
-files have already been processed.
-
 The settings menu now includes an option to control how many characters are
 displayed on a single transcription line before wrapping occurs. The default is
 35 characters.

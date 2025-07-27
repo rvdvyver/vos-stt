@@ -57,7 +57,6 @@ public class VosTtsController {
     private Timeline autoStop;
     
     private Stage browserStage;
-    private Stage monitorStage;
 
     private final Deque<Label> lines = new ArrayDeque<>();
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -130,29 +129,6 @@ public class VosTtsController {
     }
 
     @FXML
-    private void onMonitor() {
-        if (monitorStage != null && monitorStage.isShowing()) {
-            monitorStage.requestFocus();
-            return;
-        }
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/vostts/monitor.fxml"));
-            Parent root = loader.load();
-            monitorStage = new Stage();
-            monitorStage.initModality(Modality.NONE);
-            monitorStage.initStyle(StageStyle.UNDECORATED);
-            Scene scene = new Scene(root, 500, 400);
-            ThemeManager.apply(scene);
-            DragUtil.makeDraggable(monitorStage, root);
-            monitorStage.setScene(scene);
-            monitorStage.show();
-        } catch (IOException e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to open monitor: " + e.getMessage(), ButtonType.OK);
-            alert.showAndWait();
-        }
-    }
-
-    @FXML
     private void onSettings() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/vostts/settings.fxml"));
@@ -178,6 +154,7 @@ public class VosTtsController {
         if (running) {
             stopTranscription();
         }
+        executor.shutdownNow();
         Platform.exit();
     }
 
