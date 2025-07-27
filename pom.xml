@@ -68,7 +68,9 @@
                     <destination>${project.build.directory}</destination>
                     <mainClass>com.example.vostts.VosTtsApp</mainClass>
                     <name>vos-stt</name>
-                    <type>dmg</type>
+                    <!-- Image type must match enum constants defined by the
+                         jpackage plugin and is case sensitive -->
+                    <type>DMG</type>
                     <icon>${project.build.directory}/app-icon.png</icon>
                 </configuration>
                 <executions>
