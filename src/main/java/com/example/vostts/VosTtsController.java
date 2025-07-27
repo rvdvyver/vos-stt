@@ -274,12 +274,11 @@ public class VosTtsController {
     }
 
     private void runRecognition() {
-        Path base = Paths.get(System.getProperty("user.home"), "vos-stt", "sessions", currentSessionId);
-        base.toFile().mkdirs();
-        File outFile = base.resolve("transcript.srt").toFile();
-        LOG.fine(() -> "Writing transcript to " + outFile.getAbsolutePath());
+        Path sessionDir = Paths.get(System.getProperty("user.home"), "vos-stt", "sessions", currentSessionId);
+        File activeFile = new File("transcript.srt");
+        LOG.fine(() -> "Writing transcript to " + activeFile.getAbsolutePath());
         try (Model model = new Model(locateModelPath(modelDir).getAbsolutePath());
-             BufferedWriter bw = new BufferedWriter(new FileWriter(outFile))) {
+             BufferedWriter bw = new BufferedWriter(new FileWriter(activeFile))) {
             writer = bw;
             Recognizer recognizer = new Recognizer(model, 16000.0f);
             AudioFormat format = new AudioFormat(16000.0f, 16, 1, true, false);
@@ -324,6 +323,14 @@ public class VosTtsController {
                     settingsButton.setDisable(false);
                 }
             });
+            // Move the transcript to the session directory when finished
+            try {
+                sessionDir.toFile().mkdirs();
+                Files.move(activeFile.toPath(), sessionDir.resolve("transcript.srt"),
+                        StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                LOG.log(Level.SEVERE, "Failed to store session transcript", e);
+            }
             // Ensure the writer reference is cleared after the session ends.
             writer = null;
             LOG.fine("Recognition loop finished");
