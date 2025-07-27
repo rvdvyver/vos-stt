@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.vostts.MonitorController">
+    <top>
+        <BorderPane styleClass="top-bar">
+            <center>
+                <Label text="Processed Files" styleClass="title" />
+            </center>
+            <right>
+                <Button text="✕" onAction="#onClose" styleClass="icon-button close-button" />
+            </right>
+        </BorderPane>
+    </top>
+    <center>
+        <ListView fx:id="listView" />
+    </center>
+    <bottom>
+        <HBox spacing="8" alignment="CENTER_RIGHT" styleClass="bottom-bar">
+            <Button text="Refresh" onAction="#onRefresh" />
+        </HBox>
+    </bottom>
+</BorderPane>

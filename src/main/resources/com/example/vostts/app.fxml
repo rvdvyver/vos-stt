@@ -10,6 +10,7 @@
             <right>
                 <HBox spacing="8" alignment="CENTER_RIGHT">
                     <Button text="📁" onAction="#onBrowse" styleClass="icon-button" />
+                    <Button text="🗒" onAction="#onMonitor" styleClass="icon-button" />
                     <Button fx:id="settingsButton" text="⚙" onAction="#onSettings" styleClass="icon-button" />
                     <Button text="🌗" onAction="#onToggleTheme" styleClass="icon-button" />
                     <Button text="✕" onAction="#onCloseApp" styleClass="icon-button close-button" />
