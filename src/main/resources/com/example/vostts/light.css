@@ -1,7 +1,7 @@
 .root-pane {
     -fx-background-color: white;
     -fx-padding: 20;
-    -fx-background-radius: 10;
+    -fx-background-radius: 0;
     -fx-font-family: "Inter", "Roboto", "SF Pro", sans-serif;
     -fx-text-fill: black;
 }
