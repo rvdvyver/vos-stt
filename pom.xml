@@ -67,6 +67,7 @@
                     <input>${project.build.directory}</input>
                     <destination>${project.build.directory}</destination>
                     <mainClass>com.example.vostts.VosTtsApp</mainClass>
+                    <mainJar>${project.build.finalName}.jar</mainJar>
                     <name>vos-stt</name>
                     <!-- Image type must match enum constants defined by the
                          jpackage plugin and is case sensitive -->
