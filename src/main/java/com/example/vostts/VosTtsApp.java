@@ -17,6 +17,13 @@ import com.example.vostts.DragUtil;
 
 import com.example.logging.LoggingConfig;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.stream.Stream;
+
 import java.util.logging.Logger;
 
 import java.io.File;
@@ -26,6 +33,7 @@ public class VosTtsApp extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
+        cleanupTempTranscripts();
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/vostts/app.fxml"));
         Parent root = loader.load();
         VosTtsController controller = loader.getController();
@@ -88,5 +96,28 @@ public class VosTtsApp extends Application {
         LoggingConfig.configure();
         LOG.info("Launching application");
         launch(args);
+    }
+
+    /**
+     * Scan the default transcription directory for any leftover temporary files
+     * and rename them to {@code .srt} so crashed sessions are recovered.
+     */
+    private void cleanupTempTranscripts() {
+        Path base = Paths.get(System.getProperty("user.home"), "Transcriptions");
+        if (!Files.isDirectory(base)) {
+            return;
+        }
+        try (Stream<Path> stream = Files.walk(base)) {
+            stream.filter(p -> p.toString().endsWith(".tmp")).forEach(p -> {
+                try {
+                    Files.move(p, p.resolveSibling(p.getFileName().toString().replaceFirst("\\.tmp$", ".srt")),
+                               StandardCopyOption.REPLACE_EXISTING);
+                } catch (IOException e) {
+                    LOG.log(java.util.logging.Level.WARNING, "Failed to rename temp file " + p, e);
+                }
+            });
+        } catch (IOException e) {
+            LOG.log(java.util.logging.Level.WARNING, "Failed to scan for temp files", e);
+        }
     }
 }
