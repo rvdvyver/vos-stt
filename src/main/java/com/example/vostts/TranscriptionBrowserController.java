@@ -47,11 +47,13 @@ public class TranscriptionBrowserController {
 
     private void refresh() {
         sessions.clear();
-        Path base = Paths.get(System.getProperty("user.home"), "vos-stt", "sessions");
+        Path base = Paths.get(System.getProperty("user.home"), "Transcriptions");
         if (Files.isDirectory(base)) {
             try {
-                List<SessionMetadata> list = Files.list(base)
+                List<SessionMetadata> list = Files.walk(base, 2)
+                        .filter(p -> !p.equals(base))
                         .filter(Files::isDirectory)
+                        .filter(p -> p.getParent() != null && !p.getParent().equals(base))
                         .map(p -> {
                             try {
                                 return SessionMetadata.load(p);

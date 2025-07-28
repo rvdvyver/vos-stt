@@ -18,9 +18,9 @@ running the application.
 
 Click **Start Live Transcription** to begin a session. Lines of text will
 appear in large font as the mock recogniser generates them. While a session is
-running the subtitle file `transcript.srt` is written to the application
-directory. Once the session ends the file is moved into a session folder under
-your home directory with timestamps for every recognised phrase.
+running the subtitle file `transcript.tmp` is written under
+`~/Transcriptions/<today>/<session>`. When the session ends the file is renamed
+to `transcript.srt` with timestamps for every recognised phrase.
 
 Use **🗂 Browse Sessions** to open the new Transcription Browser. From there you
 can open previous transcripts in a modal viewer or remove old sessions.
@@ -41,3 +41,4 @@ mvn test package
 ```
 
 The resulting `vos-stt.dmg` can be found in the `target` directory.
+**Note:** DMG packaging is currently broken.
