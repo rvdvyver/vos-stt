@@ -60,7 +60,7 @@ public class VosTtsController {
     private Stage browserStage;
 
     private final Deque<Label> lines = new ArrayDeque<>();
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private ExecutorService executor = Executors.newSingleThreadExecutor();
     private Future<?> transcriptionTask;
     private boolean running = false;
     private BufferedWriter writer;
@@ -256,6 +256,10 @@ public class VosTtsController {
         if (transcriptionTask != null) {
             transcriptionTask.cancel(true);
         }
+        // ensure the executor is ready for the next session
+        executor.shutdownNow();
+        executor = Executors.newSingleThreadExecutor();
+        transcriptionTask = null;
         BufferedWriter w = writer;
         if (w != null) {
             try {
